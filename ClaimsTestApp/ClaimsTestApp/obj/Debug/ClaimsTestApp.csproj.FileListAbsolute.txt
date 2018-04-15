@@ -1,0 +1,12 @@
+c:\users\bmallela\documents\visual studio 2015\Projects\ClaimsTestApp\ClaimsTestApp\bin\Debug\ClaimsTestApp.exe.config
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\bin\Debug\ClaimsTestApp.exe.config
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\bin\Debug\ClaimsTestApp.exe
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\bin\Debug\ClaimsTestApp.pdb
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\bin\Debug\ExcelDataReader.DataSet.dll
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\bin\Debug\ExcelDataReader.dll
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\bin\Debug\ExcelDataReader.xml
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\bin\Debug\ExcelDataReader.DataSet.xml
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\obj\Debug\ClaimsTestApp.csprojResolveAssemblyReference.cache
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\obj\Debug\ClaimsTestApp.csproj.CoreCompileInputs.cache
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\obj\Debug\ClaimsTestApp.exe
+C:\Jatin\OtherProjects\BavyaProjects\ClaimsTestApp\ClaimsTestApp\obj\Debug\ClaimsTestApp.pdb
