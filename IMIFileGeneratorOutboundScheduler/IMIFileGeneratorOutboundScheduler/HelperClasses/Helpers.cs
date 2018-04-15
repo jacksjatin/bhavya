@@ -56,7 +56,6 @@ namespace IMIFileGeneratorOutboundScheduler.HelperClasses
                     FileInfo fileInfo = objGetFileInfo[idx];
                     fileNameList.Add(fileInfo.Name);
                     counter++;
-
                     if (counter == totalFilesCount)
                     {
                         break;

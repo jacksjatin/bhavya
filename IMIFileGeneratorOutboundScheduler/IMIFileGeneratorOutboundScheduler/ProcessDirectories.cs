@@ -9,7 +9,7 @@ using System.Configuration;
 
 namespace IMIFileGeneratorOutboundScheduler
 {   
-    public class DMKMap
+    public class DPKMap
     {
         public string strDpkValue;
         public List<ProcessKey> lstProcessKeys;
@@ -25,7 +25,7 @@ namespace IMIFileGeneratorOutboundScheduler
 
     public class ProcessDirectories
     {
-        Dictionary<string, DMKMap> _dicDmkMaps = null;      
+        Dictionary<string, DPKMap> _dicDmkMaps = null;      
         public void ProcessFolders(string inputPath)
         {
             try
@@ -101,10 +101,10 @@ namespace IMIFileGeneratorOutboundScheduler
                     var data = CsvParser.ParseHeadAndTail(reader, ',', '"');
                     var header = data.Item1;
                     var lines = data.Item2;
-                    DMKMap objdmi = null;
+                    DPKMap objdmi = null;
                     List<ProcessKey> lstprocKeys = null;
                     ProcessKey processKey = null;
-                    _dicDmkMaps = new Dictionary<string, DMKMap>();
+                    _dicDmkMaps = new Dictionary<string, DPKMap>();
                     foreach (var line in lines)
                     {
                         string[] linekeys = line[1].Split(',');
@@ -118,7 +118,7 @@ namespace IMIFileGeneratorOutboundScheduler
                             processKey.dpkPostion = strsplit[1];
                             lstprocKeys.Add(processKey);
                         }
-                        objdmi = new DMKMap();
+                        objdmi = new DPKMap();
                         objdmi.strDpkValue = line[0];
                         objdmi.lstProcessKeys = lstprocKeys;
                         _dicDmkMaps.Add(objdmi.strDpkValue, objdmi);

@@ -29,7 +29,6 @@ namespace IMIFileGeneratorOutboundScheduler
             ArrayList movedFiles = new ArrayList();
             ArrayList filesToProcess = new ArrayList();
             RetrieveConfigInformation();
-
             ProcessObj = new ProcessDirectories();
             try
             {
@@ -37,12 +36,9 @@ namespace IMIFileGeneratorOutboundScheduler
                 List<string> fileNames = null;
                 fileNames = helpers.GetFiles(htAppConfig["InputRootFolder"].ToString(), totalCount, string.Format("*"));
                 if (null == fileNames || fileNames.Count == 0) return;
-
                 for (int i = 0; i < fileNames.Count; i++)
                 {
-
                     ProcessObj.ProcessFolders(Path.Combine(htAppConfig["InputRootFolder"].ToString(), fileNames[i]));
-
                 }
             }
             catch (Exception ex)
