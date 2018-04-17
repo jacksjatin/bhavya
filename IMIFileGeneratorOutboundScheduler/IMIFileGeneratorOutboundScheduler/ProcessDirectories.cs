@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 using System.Configuration;
 
 namespace IMIFileGeneratorOutboundScheduler
-{   
+{
+
     public class DPKMap
     {
         public string strDpkValue;
@@ -25,17 +26,24 @@ namespace IMIFileGeneratorOutboundScheduler
 
     public class ProcessDirectories
     {
-        Dictionary<string, DPKMap> _dicDmkMaps = null;      
-        public void ProcessFolders(string inputPath)
+
+        private HelperClasses.Helpers helpers;
+
+        public ProcessDirectories()
+        {
+            helpers = new HelperClasses.Helpers();
+        }
+        Dictionary<string, DPKMap> _dicDmkMaps = null;
+        public void ProcessFolders(FileInfo inputPath)
         {
             try
             {
                 //string inputPath = ConfigurationManager.AppSettings["Input"];
-
                 DPKMappingCsv();
-                ParseInput(inputPath);
-
+                ParseInput(inputPath.FullName);
                 StringBuilder sb = new StringBuilder();
+                string InprocessLocation = ConfigurationManager.AppSettings["OutboundInProcessLocation"].ToString();
+                string ArchiveLocation = ConfigurationManager.AppSettings["OutboundArchiveLocation"].ToString();
                 foreach (var item in _dicDmkMaps.Keys)
                 {
                     string str = string.Empty;
@@ -49,12 +57,36 @@ namespace IMIFileGeneratorOutboundScheduler
                     sb.Append(str.ToString());
                     sb.Append("\n");
                 }
-                Console.WriteLine(sb.ToString());
+
+                WriteOutputFile(Path.GetFileNameWithoutExtension(inputPath.FullName) + DateTime.Now.ToString("yyyyMMddhhmm") + ".imi", sb.ToString());
+                if (File.Exists(Path.Combine(InprocessLocation, inputPath.Name)))
+                    helpers.MoveFile(Path.Combine(InprocessLocation, inputPath.Name), Path.Combine(ArchiveLocation, inputPath.Name), true);
+                string searchPattern = inputPath.Name.Replace(".idx", "") + "*";
+                string[] fullFilePath = Directory.GetFiles(InprocessLocation, searchPattern);
+                FileInfo fi = new FileInfo(fullFilePath[0]);
+                if (File.Exists(Path.Combine(InprocessLocation, fi.Name)))
+                    helpers.MoveFile(Path.Combine(InprocessLocation, fi.Name), Path.Combine(ArchiveLocation, fi.Name), true);
+
+                // Console.WriteLine();
             }
             catch (Exception ex)
             {
 
             }
+        }
+
+        public void WriteOutputFile(string filename, string content)
+        {
+            try
+            {
+                File.WriteAllText(Path.Combine(ConfigurationManager.AppSettings["OutboundOutputLocation"], filename), content);
+                File.WriteAllText(Path.Combine(ConfigurationManager.AppSettings["OutboundTrackingLocation"], filename), content);
+            }
+            catch (Exception ex)
+            {
+
+            }
+
         }
 
         public void ParseInput(string path)

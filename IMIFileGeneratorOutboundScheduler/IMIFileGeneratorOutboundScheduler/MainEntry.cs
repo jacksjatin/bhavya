@@ -51,7 +51,7 @@ namespace IMIFileGeneratorOutboundScheduler
 
             }
             if (!IsSuccess)
-            {              
+            {
                 return;
             }
 
@@ -75,13 +75,13 @@ namespace IMIFileGeneratorOutboundScheduler
 
             if (args.Length > 2)
             {
-                argsEnum = ValidateArgs.ExcessArguments;               
+                argsEnum = ValidateArgs.ExcessArguments;
                 return argsEnum;
             }
-            if (args[0].ToUpper()!="BATCH")
+            if (args[0].ToUpper() != "BATCH")
             {
 
-                argsEnum = ValidateArgs.InvalidParameter;               
+                argsEnum = ValidateArgs.InvalidParameter;
                 return argsEnum;
             }
 

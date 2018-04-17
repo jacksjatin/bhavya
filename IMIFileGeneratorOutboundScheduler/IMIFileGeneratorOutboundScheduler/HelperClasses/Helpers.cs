@@ -42,6 +42,130 @@ namespace IMIFileGeneratorOutboundScheduler.HelperClasses
             return sb.ToString();
         }
 
+        public void MoveFile(string Source, string Destination, bool OverWrite)
+        {
+            try
+            {
+                File.Copy(Source, Destination, OverWrite);
+
+                File.Delete(Source);
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error in MoveFile method. " + ex.Message);
+            }
+        }
+
+        public void MoveFiles(List<string> fileNames, string sourceLoc, string DestLoc)
+        {
+            //This method may still requires some modifications.
+            //Need to revisit later
+            try
+            {
+                string errorFileMessages = string.Empty;
+                foreach (string file in fileNames)
+                {
+                    try
+                    {
+                        File.Move(Path.Combine(sourceLoc, file), Path.Combine(DestLoc, file));
+                    }
+                    catch (Exception fileEx)
+                    {
+                        errorFileMessages = errorFileMessages + fileEx + " " + file;
+                        continue;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(FormatErrorMessage(ex.Message));
+            }
+        }
+
+        public void MoveImageFiles(List<string> fileNames, string sourceLoc, string DestLoc)
+        {
+            //This method may still requires some modifications.
+            //Need to revisit later
+            try
+            {
+                string errorFileMessages = string.Empty;
+                foreach (string file in fileNames)
+                {
+                    try
+                    {
+                        string searchPattern = file.Replace(".idx", "") + "*";
+                        string[] fullFilePath = Directory.GetFiles(sourceLoc, searchPattern);
+                        FileInfo fi = new FileInfo(fullFilePath[0]);
+                        File.Move(Path.Combine(sourceLoc, fi.Name), Path.Combine(DestLoc, fi.Name));
+                    }
+                    catch (Exception fileEx)
+                    {
+                        errorFileMessages = errorFileMessages + fileEx + " " + file;
+                        continue;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(FormatErrorMessage(ex.Message));
+            }
+        }
+
+        public bool CopyFile(string strFileName, string strDestPath, bool bOverwrite)
+        {
+            //Copies the file from one folder to another folder.
+            try
+            {
+                if (bOverwrite)
+                {
+                    File.Copy(strFileName, strDestPath, bOverwrite);
+                }
+                else
+                {
+                    DeleteFile(strDestPath);
+                    File.Copy(strFileName, strDestPath);
+                }
+
+                return true;
+
+            }
+            catch (IOException ioex)
+            {
+                throw new Exception("Error in CopyFile method of Helpers class ." + ioex.Message);
+            }
+            catch (ArgumentException arex)
+            {
+                throw new Exception("Error in CopyFile method of Helpers class ." + arex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error in CopyFile method of Helpers class ." + ex.Message);
+            }
+        }
+
+        public static bool DeleteFile(string strFileName)
+        {
+            //Deletes the file from the specified path
+            try
+            {
+                File.Delete(strFileName);
+                return true;
+            }
+            catch (IOException ioex)
+            {
+                throw new Exception("Error in DeleteFile method of Helpers class ." + ioex.Message);
+            }
+            catch (ArgumentException arex)
+            {
+                throw new Exception("Error in DeleteFile method of Helpers class ." + arex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error in DeleteFile method of Helpers class ." + ex.Message);
+            }
+        }
+
         public List<string> GetFiles(string strFilePath, int totalFilesCount, string strPattern)
         {
             try
@@ -67,19 +191,19 @@ namespace IMIFileGeneratorOutboundScheduler.HelperClasses
 
             catch (InvalidOperationException iopex)
             {
-                throw new Exception("Error in SortFiles method of FileSystemUtilty class of GenericUtility." + iopex.Message);
+                throw new Exception("Error in SortFiles method of Helpers class ." + iopex.Message);
             }
             catch (DriveNotFoundException diex)
             {
-                throw new Exception("Error in SortFiles method of FileSystemUtilty class of GenericUtility." + diex.Message);
+                throw new Exception("Error in SortFiles method of Helpers class ." + diex.Message);
             }
             catch (ArgumentNullException arnullex)
             {
-                throw new Exception("Error in SortFiles method of FileSystemUtilty class of GenericUtility." + arnullex.Message);
+                throw new Exception("Error in SortFiles method of Helpers class ." + arnullex.Message);
             }
             catch (Exception ex)
             {
-                throw new Exception("Error in SortFiles method of FileSystemUtilty class of GenericUtility." + ex.Message);
+                throw new Exception("Error in SortFiles method of Helpers class ." + ex.Message);
             }
         }
     }
