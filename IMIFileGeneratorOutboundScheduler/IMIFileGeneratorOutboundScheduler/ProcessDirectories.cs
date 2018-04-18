@@ -57,6 +57,9 @@ namespace IMIFileGeneratorOutboundScheduler
                     sb.Append(str.ToString());
                     sb.Append("\n");
                 }
+                //genereim
+
+
 
                 WriteOutputFile(Path.GetFileNameWithoutExtension(inputPath.FullName) + DateTime.Now.ToString("yyyyMMddhhmm") + ".imi", sb.ToString());
                 if (File.Exists(Path.Combine(InprocessLocation, inputPath.Name)))
@@ -126,37 +129,49 @@ namespace IMIFileGeneratorOutboundScheduler
         {
             try
             {
-                string fileName = ConfigurationManager.AppSettings["DPKMapping"];
-                using (var stream = File.OpenRead(fileName))
-                using (var reader = new StreamReader(stream))
+
+                ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+                configFileMap.ExeConfigFilename = ConfigurationManager.AppSettings["DpkMapping"]; // full path to the config file
+                Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+                AppSettingsSection section = (AppSettingsSection)config.GetSection("appSettings");
+
+                DPKMap objdmi = null;
+                List<ProcessKey> lstprocKeys = null;
+                ProcessKey processKey = null;
+                _dicDmkMaps = new Dictionary<string, DPKMap>();
+                foreach (var dpk in section.Settings.AllKeys)
                 {
-                    var data = CsvParser.ParseHeadAndTail(reader, ',', '"');
-                    var header = data.Item1;
-                    var lines = data.Item2;
-                    DPKMap objdmi = null;
-                    List<ProcessKey> lstprocKeys = null;
-                    ProcessKey processKey = null;
-                    _dicDmkMaps = new Dictionary<string, DPKMap>();
-                    foreach (var line in lines)
+                    string dpkposVal = section.Settings[dpk].Value;
+                    string[] linekeys = dpkposVal.Split(',');
+                    lstprocKeys = new List<ProcessKey>();
+                    foreach (var item in linekeys)
                     {
-                        string[] linekeys = line[1].Split(',');
-                        lstprocKeys = new List<ProcessKey>();
-
-                        foreach (var item in linekeys)
-                        {
-                            processKey = new ProcessKey();
-                            string[] strsplit = item.Split('_');
-                            processKey.dpkKey = strsplit[0];
-                            processKey.dpkPostion = strsplit[1];
-                            lstprocKeys.Add(processKey);
-                        }
-                        objdmi = new DPKMap();
-                        objdmi.strDpkValue = line[0];
-                        objdmi.lstProcessKeys = lstprocKeys;
-                        _dicDmkMaps.Add(objdmi.strDpkValue, objdmi);
-
+                        processKey = new ProcessKey();
+                        string[] strsplit = item.Split('_');
+                        processKey.dpkKey = strsplit[0];
+                        processKey.dpkPostion = strsplit[1];
+                        lstprocKeys.Add(processKey);
                     }
+                    objdmi = new DPKMap();
+                    objdmi.strDpkValue = dpk;
+                    objdmi.lstProcessKeys = lstprocKeys;
+                    _dicDmkMaps.Add(objdmi.strDpkValue, objdmi);
                 }
+                //string fileName = ConfigurationManager.AppSettings["DPKMapping"];
+                //using (var stream = File.OpenRead(fileName))
+                //using (var reader = new StreamReader(stream))
+                //{
+                //    var data = CsvParser.ParseHeadAndTail(reader, ',', '"');
+                //    var header = data.Item1;
+                //    var lines = data.Item2;
+
+                //    _dicDmkMaps = new Dictionary<string, DPKMap>();
+                //    foreach (var line in lines)
+                //    {
+
+
+                //    }
+                //}
             }
             catch (Exception ex)
             {

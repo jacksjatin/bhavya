@@ -20,12 +20,12 @@ namespace IMIFileGeneratorOutboundScheduler
         public ProcessMetadataFiles()
         {
             helpers = new HelperClasses.Helpers();
-            
+
         }
 
 
         public void GetMDFiles()
-        {
+        {  
             ArrayList movedFiles = new ArrayList();
             ArrayList filesToProcess = new ArrayList();
             RetrieveConfigInformation();
@@ -72,7 +72,7 @@ namespace IMIFileGeneratorOutboundScheduler
                             string fileName = string.Empty;
                             FileInfo fileInfo = new FileInfo(Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), fileNames[fileCount]));
                             fileName = fileNames[fileCount].ToString();
-                           // MoveToDealerDirectory(fileInfo);
+                            // MoveToDealerDirectory(fileInfo);
                             ProcessObj.ProcessFolders(fileInfo);
                             fileCount++;
                             if (fileCount == fileNames.Count)
