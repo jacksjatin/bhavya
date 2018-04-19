@@ -44,7 +44,7 @@ namespace ClaimsTestApp
                 if (!string.IsNullOrEmpty(edipath))
                 {
                     bool statuscheck = false;
-                   //edipath = @"C:\Jatin\filedep2\IMI\Batch1";
+                    edipath = @"C:\Jatin\filedep2\IMI\Batch1";
                     DirectoryInfo di = new DirectoryInfo(edipath);
                     var edifiles = di.GetFiles();
                     foreach (var file in edifiles)
@@ -57,6 +57,7 @@ namespace ClaimsTestApp
                             statuscheck = true;
                             string hdr = GetHeader(editext);
                             string subscriberInfo = GetSubscriberInfo(editext, contract, oldpcn);
+                            string latestHdr = GetNewHeader(subscriberInfo.Split('\n')[0], editext);
                             subscriberInfo = UpdatePatientCNumber(subscriberInfo, oldpcn, newpcn);
                             subscriberInfo = FormateSubscriberInfo(subscriberInfo);
                             string ft = Getfooter(editext, hdr + subscriberInfo);
@@ -64,11 +65,11 @@ namespace ClaimsTestApp
                             string updatedftr = updateGESegment(hdr, ft);
                             if (updatedftr != "")
                             {
-                                fText = hdr + subscriberInfo + updatedftr;
+                                fText = hdr + latestHdr + subscriberInfo + updatedftr;
                             }
                             else
                             {
-                                fText = hdr + subscriberInfo + ft;
+                                fText = hdr + latestHdr + subscriberInfo + ft;
                             }
                             writeToText(fText, file.Name, editype, newpcn);
                         }
@@ -90,6 +91,50 @@ namespace ClaimsTestApp
 
         }
 
+        private static string GetNewHeader(string sbrinfo, string editext)
+        {
+            try
+            {
+
+                string[] editxtArr = editext.Split('\n');
+                List<string> list = new List<string>(editxtArr);
+                int index = 0;
+                int hlindx = 0;
+                char delimeter;
+                for (int i = 0; i < editxtArr.Length; i++)
+                {
+                    if (editxtArr[i].ToString() == sbrinfo)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+
+                for (int j = index; j >= 0; j--)
+                {
+                    delimeter = editxtArr[j].Contains("*") ? '*' : editxtArr[j].Contains(">") ? '>' : '*';
+
+                    if (editxtArr[j].Contains(string.Concat("NM1" + delimeter + "85")))
+                    {
+                        List<string> sublist = list.GetRange(j, hlindx - j);
+                        string output = string.Join("", sublist);
+                        return output;
+                    }
+                    else if (editxtArr[j].Contains(string.Concat("HL" + delimeter)))
+                    {
+                        hlindx = j;
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return "";
+        }
+
         private static string FormateSubscriberInfo(string segmentinfo)
         {
             string finalOutput = string.Empty;
@@ -99,6 +144,7 @@ namespace ClaimsTestApp
                 int count = 1;
                 char delimeter;
                 int HLIndex = 0;
+                int SEIndex = 0;
                 for (int i = 0; i < segmentedArr.Length; i++)
                 {
                     delimeter = segmentedArr[i].Contains("*") ? '*' : segmentedArr[i].Contains(">") ? '>' : '*';
@@ -124,9 +170,20 @@ namespace ClaimsTestApp
                         }
                         segmentedArr[i] = originalValue;
                     }
+                    else if (segmentedArr[i].Contains(string.Concat("SE" + delimeter)))
+                    {
+                        SEIndex = i;
+                    }
                 }
                 List<string> list = new List<string>(segmentedArr);
-                list.RemoveRange(HLIndex, segmentedArr.Length - HLIndex);
+                if (SEIndex > 0)
+                {
+                    list.RemoveRange(SEIndex, segmentedArr.Length - SEIndex);
+                }
+                else
+                {
+                    list.RemoveRange(HLIndex, segmentedArr.Length - HLIndex);
+                }
                 finalOutput = ConvertStringArrayToString(list.ToArray());
 
             }
@@ -221,15 +278,15 @@ namespace ClaimsTestApp
             int check = 0;
             foreach (var segment in segments)
             {
-                if (segment.segment == "HL")
+                if (segment.segment == "NM1" && segment.data.Contains("NM1" + ElemDelimeter + "85"))
                 {
                     check = check + 1;
-                }
-                if (check == 2)
-                {
                     return header;
                 }
-                header = header + segment.data.ToString() + SegDelimeter + "\r\n";
+                else
+                {
+                    header = header + segment.data.ToString() + SegDelimeter + "\r\n";
+                }
             }
             return header;
         }
