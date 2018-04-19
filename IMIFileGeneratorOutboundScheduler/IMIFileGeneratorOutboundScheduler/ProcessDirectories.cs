@@ -156,22 +156,7 @@ namespace IMIFileGeneratorOutboundScheduler
                     objdmi.strDpkValue = dpk;
                     objdmi.lstProcessKeys = lstprocKeys;
                     _dicDmkMaps.Add(objdmi.strDpkValue, objdmi);
-                }
-                //string fileName = ConfigurationManager.AppSettings["DPKMapping"];
-                //using (var stream = File.OpenRead(fileName))
-                //using (var reader = new StreamReader(stream))
-                //{
-                //    var data = CsvParser.ParseHeadAndTail(reader, ',', '"');
-                //    var header = data.Item1;
-                //    var lines = data.Item2;
-
-                //    _dicDmkMaps = new Dictionary<string, DPKMap>();
-                //    foreach (var line in lines)
-                //    {
-
-
-                //    }
-                //}
+                }               
             }
             catch (Exception ex)
             {

@@ -25,9 +25,9 @@ namespace IMIFileGeneratorOutboundScheduler
             ValidateArgs chkArgsEnum = ValidateArgs.Success;
             chkArgsEnum = (ValidateArgs)ValidateParameters(args);
 
-            ProcessDirectories request = null;
-
             ProcessMetadataFiles objdir = null;
+            ProcessIMIFiles objImiFiles = null;
+
 
             switch (chkArgsEnum)
             {
@@ -55,10 +55,23 @@ namespace IMIFileGeneratorOutboundScheduler
                 return;
             }
 
-           
 
-            objdir = new ProcessMetadataFiles();
-            objdir.GetMDFiles();
+            if (args[0].Equals("BATCH", StringComparison.CurrentCultureIgnoreCase))
+            {
+                //Generate IMI Files
+                objdir = new ProcessMetadataFiles();
+                objdir.GetMDFiles();
+                return;
+            }
+            else if (args[0].Equals("UPLOAD", StringComparison.CurrentCultureIgnoreCase))
+            {
+                //Upload IMI files to SFTP
+                objImiFiles = new ProcessIMIFiles();
+                objImiFiles.GetIMIFiles();
+                return;
+            }
+
+
 
             //request = new ProcessDirectories();           
             //request.ProcessFolders();
@@ -80,9 +93,10 @@ namespace IMIFileGeneratorOutboundScheduler
                 argsEnum = ValidateArgs.ExcessArguments;
                 return argsEnum;
             }
-            if (args[0].ToUpper() != "BATCH")
+            if (!((args[0].Trim().Equals("BATCH", StringComparison.CurrentCultureIgnoreCase)) ||
+                   (args[0].Trim().Equals("UPLOAD", StringComparison.CurrentCultureIgnoreCase))
+               ))
             {
-
                 argsEnum = ValidateArgs.InvalidParameter;
                 return argsEnum;
             }

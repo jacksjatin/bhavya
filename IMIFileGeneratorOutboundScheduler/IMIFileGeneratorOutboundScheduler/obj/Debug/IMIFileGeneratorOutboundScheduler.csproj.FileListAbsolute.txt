@@ -12,3 +12,5 @@ C:\Jatin\OtherProjects\BavyaProjects\GIT\bhavya\IMIFileGeneratorOutboundSchedule
 C:\Jatin\OtherProjects\BavyaProjects\GIT\bhavya\IMIFileGeneratorOutboundScheduler\IMIFileGeneratorOutboundScheduler\obj\Debug\IMIFileGeneratorOutboundScheduler.csproj.CoreCompileInputs.cache
 C:\Jatin\OtherProjects\BavyaProjects\GIT\bhavya\IMIFileGeneratorOutboundScheduler\IMIFileGeneratorOutboundScheduler\obj\Debug\IMIFileGeneratorOutboundScheduler.exe
 C:\Jatin\OtherProjects\BavyaProjects\GIT\bhavya\IMIFileGeneratorOutboundScheduler\IMIFileGeneratorOutboundScheduler\obj\Debug\IMIFileGeneratorOutboundScheduler.pdb
+C:\Jatin\OtherProjects\BavyaProjects\GIT\bhavya\IMIFileGeneratorOutboundScheduler\IMIFileGeneratorOutboundScheduler\bin\Debug\Renci.SshNet.dll
+C:\Jatin\OtherProjects\BavyaProjects\GIT\bhavya\IMIFileGeneratorOutboundScheduler\IMIFileGeneratorOutboundScheduler\bin\Debug\Renci.SshNet.xml
