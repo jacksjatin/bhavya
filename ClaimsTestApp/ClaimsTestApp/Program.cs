@@ -12,14 +12,17 @@ namespace ClaimsTestApp
 {
     class Program
     {
+
         static void Main(string[] args)
         {
             string oldpcn = string.Empty;
             string newpcn = string.Empty;
             string editype = string.Empty;
             string edipath = string.Empty;
+            string amount = string.Empty;
             string contract = string.Empty;
             string receiveddate = string.Empty;
+            
             DataTable data = new DataTable();
             string unidentified = string.Empty;
             data = ProcessExcel(ConfigurationManager.AppSettings["ExcelPath"]);
@@ -35,6 +38,7 @@ namespace ClaimsTestApp
                 contract = row[3].ToString().Trim();
                 receiveddate = row[4].ToString().Trim();
                 editype = row[5].ToString().Trim();
+                amount = row[8].ToString().Trim();
                 oldpcn = row[10].ToString().Trim();
                 newpcn = row[11].ToString().Trim();
                 if (!string.IsNullOrEmpty(receiveddate))
@@ -48,18 +52,23 @@ namespace ClaimsTestApp
                     DirectoryInfo di = new DirectoryInfo(edipath);
                     var edifiles = di.GetFiles();
                     foreach (var file in edifiles)
-                    {
+                    {                        
                         FileStream fstream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
                         StreamReader sreader = new StreamReader(fstream);
                         string editext = sreader.ReadToEnd();
-                        if (editext.Contains(contract) && editext.Contains(oldpcn))
+                        if (editext.Contains(contract) && (editext.Contains(oldpcn + "*" + amount) || editext.Contains(oldpcn + ">" + amount) || editext.Contains(oldpcn + "|" + amount)))
                         {
+                            bool secheck = false;
                             statuscheck = true;
                             string hdr = GetHeader(editext);
-                            string subscriberInfo = GetSubscriberInfo(editext, contract, oldpcn);
+                            string subscriberInfo = GetSubscriberInfo(editext, contract, oldpcn, ref secheck);
                             string latestHdr = GetNewHeader(subscriberInfo.Split('\n')[0], editext);
                             subscriberInfo = UpdatePatientCNumber(subscriberInfo, oldpcn, newpcn);
-                            subscriberInfo = FormateSubscriberInfo(subscriberInfo);
+                            string newsubscriberInfo = FormateSubscriberInfo(subscriberInfo, secheck);
+                            if (newsubscriberInfo != "")
+                            {
+                                subscriberInfo = newsubscriberInfo;
+                            }
                             string ft = Getfooter(editext, hdr + subscriberInfo);
                             string fText = string.Empty;
                             string updatedftr = updateGESegment(hdr, ft);
@@ -112,7 +121,7 @@ namespace ClaimsTestApp
 
                 for (int j = index; j >= 0; j--)
                 {
-                    delimeter = editxtArr[j].Contains("*") ? '*' : editxtArr[j].Contains(">") ? '>' : '*';
+                    delimeter = editxtArr[j].Contains("*") ? '*' : editxtArr[j].Contains(">") ? '>' : '|';
 
                     if (editxtArr[j].Contains(string.Concat("NM1" + delimeter + "85")))
                     {
@@ -135,7 +144,7 @@ namespace ClaimsTestApp
             return "";
         }
 
-        private static string FormateSubscriberInfo(string segmentinfo)
+        private static string FormateSubscriberInfo(string segmentinfo, bool SEcheck)
         {
             string finalOutput = string.Empty;
             try
@@ -147,7 +156,7 @@ namespace ClaimsTestApp
                 int SEIndex = 0;
                 for (int i = 0; i < segmentedArr.Length; i++)
                 {
-                    delimeter = segmentedArr[i].Contains("*") ? '*' : segmentedArr[i].Contains(">") ? '>' : '*';
+                    delimeter = segmentedArr[i].Contains("*") ? '*' : segmentedArr[i].Contains(">") ? '>' : '|';
 
                     if (segmentedArr[i].Contains(string.Concat("HL" + delimeter)))
                     {
@@ -155,6 +164,7 @@ namespace ClaimsTestApp
                         string[] lineArr = segmentedArr[i].Split(delimeter);
                         count++;
                         lineArr[1] = count.ToString();
+                        lineArr[2] = (count - 1).ToString();
                         var lastValue = lineArr.Last();
                         string originalValue = string.Empty;
                         foreach (var item in lineArr)
@@ -170,22 +180,17 @@ namespace ClaimsTestApp
                         }
                         segmentedArr[i] = originalValue;
                     }
-                    else if (segmentedArr[i].Contains(string.Concat("SE" + delimeter)))
-                    {
-                        SEIndex = i;
-                    }
+                    //else if (segmentedArr[i].Contains(string.Concat("SE" + delimeter)))
+                    //{
+                    //    SEIndex = i;
+                    //}
                 }
                 List<string> list = new List<string>(segmentedArr);
-                if (SEIndex > 0)
-                {
-                    list.RemoveRange(SEIndex, segmentedArr.Length - SEIndex);
-                }
-                else
-                {
-                    list.RemoveRange(HLIndex, segmentedArr.Length - HLIndex);
-                }
+                if (SEcheck != true)
+                {                    
+                    list.RemoveRange(HLIndex, segmentedArr.Length - HLIndex);                   
+                }                
                 finalOutput = ConvertStringArrayToString(list.ToArray());
-
             }
             catch (Exception ex)
             {
@@ -205,7 +210,7 @@ namespace ClaimsTestApp
             string[] gehdrLineArr = null;
             string[] geftrLineArr = null;
             string modifiedval = string.Empty;
-            delimeter = hdrArr[1].Contains("*") ? '*' : hdrArr[1].Contains(">") ? '>' : '*';
+            delimeter = hdrArr[1].Contains("*") ? '*' : hdrArr[1].Contains(">") ? '>' : '|';
             GEhdrSegment = hdrArr[1].Split(delimeter)[6].ToString();
             gehdrLineArr = hdrArr[1].Split(delimeter);
             GEftrSegment = ftrArr[1].Split(delimeter)[2].ToString();
@@ -352,7 +357,7 @@ namespace ClaimsTestApp
             }
             File.WriteAllText("C:/EDIDate" + filename + ".txt", text);
         }
-        private static string GetSubscriberInfo(string message, string contractnum, string opcn)
+        private static string GetSubscriberInfo(string message, string contractnum, string opcn, ref bool secheck)
         {
             string ContractSegment = string.Empty;
             char SegDelimeter = message[105];
@@ -391,8 +396,14 @@ namespace ClaimsTestApp
                             if (lxcheck)
                             {
                                 if (segment.segment == "SE" || segment.data.Contains(nm1))
-
+                                {
+                                    if (segment.segment == "SE")
+                                    {
+                                        secheck = true;
+                                    }
                                     break;
+
+                                }
                             }
                         }
                     }
@@ -406,6 +417,7 @@ namespace ClaimsTestApp
                     }
                     else
                     {
+                        secheck = true;
                         break;
                     }
                 }
