@@ -85,7 +85,8 @@ namespace ClaimsTestApp
                             {
                                 fText = UpdateSESegmentCount(hdr, subscriberInfo, latestHdr, ft);
                             }
-                            writeToText(fText, file.Name, editype, newpcn);
+                            File.WriteAllText(@"C:\Jatin\filedep2\EDI\IN.txt", fText);
+                          //  writeToText(fText, file.Name, editype, newpcn);
                         }
                         sreader.Close();
                         fstream.Close();
@@ -390,6 +391,8 @@ namespace ClaimsTestApp
         }
         private static void writeToText(string text, string filename, string type, string npcn)
         {
+
+           
             if (type == "IN")
             {
                 filename = "InstOutput/" + npcn;
@@ -398,7 +401,9 @@ namespace ClaimsTestApp
             {
                 filename = "ProfOutput/" + npcn;
             }
-            File.WriteAllText("C:/EDIDate" + filename + ".txt", text);
+
+            
+           
         }
         private static string GetSubscriberInfo(string message, string contractnum, string opcn, ref bool secheck)
         {
