@@ -12,7 +12,7 @@ namespace IMIAcknowledgementValidator
     public class PurgeAckFIles
     {
         private HelperClasses.Helpers helpers;
-        string  SourceLocation = string.Empty;
+        string SourceLocation = string.Empty;
         public void PurgingAcks()
         {
             try
@@ -70,7 +70,7 @@ namespace IMIAcknowledgementValidator
                     if (bSleep) System.Threading.Thread.Sleep(sleepTime * 1000);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
@@ -87,14 +87,14 @@ namespace IMIAcknowledgementValidator
                     iString.Substring(8, 2) + ":" + iString.Substring(10, 2) + ":" + iString.Substring(12, 2) + "."
                     + iString.Substring(14, 3);
 
-                int HoursExpires = 0;
-                int.TryParse(ConfigurationManager.AppSettings["HoursToExpire"], out HoursExpires);
+                int MinutesExpires = 0;
+                int.TryParse(ConfigurationManager.AppSettings["HoursToExpire"], out MinutesExpires);
 
                 string testValu = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
                 //   20180423175120543
                 DateTime oDate = DateTime.ParseExact(iString, "yyyy-MM-dd HH:mm:ss.fff", null);
-                var hours = (DateTime.Now - oDate).TotalHours;
-                if (hours >= HoursExpires)
+                var minutes = (DateTime.Now - oDate).TotalMinutes;
+                if (minutes >= MinutesExpires)
                 {
                     string ackFileName = fileName.Replace(".imi", ".ack");
                     if (File.Exists(Path.Combine(SourceLocation, ackFileName)))
