@@ -88,7 +88,7 @@ namespace IMIFileGeneratorOutboundScheduler
                 return argsEnum;
             }
 
-            if (args.Length > 2)
+            if (args.Length > 1)
             {
                 argsEnum = ValidateArgs.ExcessArguments;
                 return argsEnum;

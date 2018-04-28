@@ -140,9 +140,6 @@ namespace IMIFileGeneratorOutboundScheduler
                     Directory.Delete(di.FullName, true);
 
                 }
-
-
-
             }
 
         }

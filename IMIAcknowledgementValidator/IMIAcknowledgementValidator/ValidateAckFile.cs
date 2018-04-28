@@ -31,13 +31,17 @@ namespace IMIAcknowledgementValidator
 
                 string ReconcileLocation = ConfigurationManager.AppSettings["ReconcileLocation"].ToString();
                 string[] SuccessCode = ConfigurationManager.AppSettings["SuccessCodes"].Split(',');
-                for (int i = 0; i < SuccessCode.Length; i++)
-                {
-                    if (ackData.Contains(SuccessCode[i]))
-                    {
-                        Success = true;
-                    }
-                }
+
+                Success = ContainsAll(ackData,SuccessCode, StringComparison.OrdinalIgnoreCase);
+                //for (int i = 0; i < SuccessCode.Length; i++)
+                //{
+                //    Success = false;
+                //    if (ackData.Contains(SuccessCode[i]))
+                //    {
+                //        Success = true;
+                //    }                                        
+                   
+                //}
                 string imifilename = fi.Name.Replace(".ack", ".imi");
                 if (!Success)
                 {
@@ -50,7 +54,6 @@ namespace IMIAcknowledgementValidator
                 }
                 else
                 {
-                    
                     if (File.Exists(Path.Combine(TrackingLocation, imifilename)))
                     {
                         helpers.MoveFile(Path.Combine(TrackingLocation, imifilename), Path.Combine(ArchiveLocation, imifilename), true);
@@ -62,10 +65,19 @@ namespace IMIAcknowledgementValidator
             }
             catch (Exception ex)
             {
-
                 throw;
             }
 
+        }
+
+        public bool ContainsAll(string source, IEnumerable<string> values, StringComparison comp = StringComparison.CurrentCulture)
+        {
+            return values.All(value => ContainsStr(source,value, comp));
+        }
+
+        public bool ContainsStr(string source, string value, StringComparison comp)
+        {
+            return source.IndexOf(value, comp) > -1;
         }
     }
 }

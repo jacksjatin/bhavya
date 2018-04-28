@@ -103,7 +103,6 @@ namespace IMIAcknowledgementValidator
                     }
                     else
                     {
-
                         helpers.MoveFile(Path.Combine(TrackingLocation, fileName), Path.Combine(ReconcileLocation, fileName), true);
                     }
                 }

@@ -60,7 +60,7 @@ namespace IMIFileGeneratorOutboundScheduler
                            
                             NameValueCollection nvcFile = new NameValueCollection();
                             string fileName = string.Empty;
-                            FileInfo fileInfo = new FileInfo(Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), fileNames[fileCount]));
+                            FileInfo fileInfo = new FileInfo(Path.Combine(htAppConfig["SFTPInProcessLocation"].ToString(), fileNames[fileCount]));
                             fileName = fileNames[fileCount].ToString();
                             objuploadToSFTP.uploadFiletoSFTP(fileInfo);
                             fileCount++;

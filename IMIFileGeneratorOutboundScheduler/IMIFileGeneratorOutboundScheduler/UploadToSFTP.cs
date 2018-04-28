@@ -11,25 +11,10 @@ namespace IMIFileGeneratorOutboundScheduler
 {
     public class UploadToSFTP
     {
-        // SftpClient sftpClient = new SftpClient(getSftpConnection("Host", "username", 8000, "publicKeyPath"));
-
-        public static ConnectionInfo getSftpConnection(string host, string username, int port, string publicKeyPath)
-        {
-            return new ConnectionInfo(host, port, username, privateKeyObject(username, publicKeyPath));
-        }
-
-        private static AuthenticationMethod[] privateKeyObject(string username, string publicKeyPath)
-        {
-            PrivateKeyFile privateKeyFile = new PrivateKeyFile(publicKeyPath);
-            PrivateKeyAuthenticationMethod privateKeyAuthenticationMethod =
-                 new PrivateKeyAuthenticationMethod(username, privateKeyFile);
-            return new AuthenticationMethod[] { privateKeyAuthenticationMethod };
-        }
-
-
+       
         public void uploadFiletoSFTP(FileInfo fi)
         {
-            using (SftpClient sftpClient = new SftpClient(getSftpConnection("host", "userName", 22, "filePath")))
+            using (SftpClient sftpClient = new SftpClient("host",22,"username","password"))
             {
                 Console.WriteLine("Connect to server");
                 sftpClient.Connect();
@@ -37,7 +22,7 @@ namespace IMIFileGeneratorOutboundScheduler
                 using (FileStream fs = new FileStream(fi.FullName, FileMode.Open))
                 {
                     sftpClient.BufferSize = 1024;
-                    sftpClient.UploadFile(fs, fi.Name);
+                    sftpClient.UploadFile(fs, Path.Combine("",fi.Name));
                 }
                 sftpClient.Dispose();
             }

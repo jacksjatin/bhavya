@@ -59,7 +59,9 @@ namespace IMIFileGeneratorOutboundScheduler
                 }
                 //genereim
 
-
+           string[] getImagePath = Directory.EnumerateFiles(InprocessLocation).
+                    Where(fn => !Path.GetExtension(fn)
+                    .Equals(".idx", StringComparison.OrdinalIgnoreCase)).ToArray();
 
                 WriteOutputFile(Path.GetFileNameWithoutExtension(inputPath.FullName) + DateTime.Now.ToString("yyyyMMddhhmm") + ".imi", sb.ToString());
                 if (File.Exists(Path.Combine(InprocessLocation, inputPath.Name)))
@@ -70,6 +72,11 @@ namespace IMIFileGeneratorOutboundScheduler
                 if (File.Exists(Path.Combine(InprocessLocation, fi.Name)))
                     helpers.MoveFile(Path.Combine(InprocessLocation, fi.Name), Path.Combine(ArchiveLocation, fi.Name), true);
 
+
+                string destinationpath = "";
+                if (File.Exists(destinationpath))
+                    helpers.CopyFile(destinationpath,
+                        Path.Combine(ConfigurationManager.AppSettings["OutboundTrackingLocation"], "filename"), true);
                 // Console.WriteLine();
             }
             catch (Exception ex)
@@ -103,12 +110,8 @@ namespace IMIFileGeneratorOutboundScheduler
 
                     string dpkvalue = splitedline[28];
                     string imgPath = splitedline.Last();
-
                     _dicDmkMaps[dpkvalue].imagePath = imgPath;
-
-
                     var dictionary = _dicDmkMaps[dpkvalue];
-
                     for (int j = 0; j < dictionary.lstProcessKeys.Count; j++)
                     {
                         string key = dictionary.lstProcessKeys[j].dpkKey;

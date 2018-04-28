@@ -5,6 +5,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ExcelDataReader;
 
@@ -22,7 +23,7 @@ namespace ClaimsTestApp
             string amount = string.Empty;
             string contract = string.Empty;
             string receiveddate = string.Empty;
-            
+
             DataTable data = new DataTable();
             string unidentified = string.Empty;
             data = ProcessExcel(ConfigurationManager.AppSettings["ExcelPath"]);
@@ -52,7 +53,7 @@ namespace ClaimsTestApp
                     DirectoryInfo di = new DirectoryInfo(edipath);
                     var edifiles = di.GetFiles();
                     foreach (var file in edifiles)
-                    {                        
+                    {
                         FileStream fstream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
                         StreamReader sreader = new StreamReader(fstream);
                         string editext = sreader.ReadToEnd();
@@ -74,11 +75,15 @@ namespace ClaimsTestApp
                             string updatedftr = updateGESegment(hdr, ft);
                             if (updatedftr != "")
                             {
-                                fText = hdr + latestHdr + subscriberInfo + updatedftr;
+                                // fText = hdr + latestHdr + subscriberInfo + updatedftr;
+                                fText = UpdateSESegmentCount(hdr, subscriberInfo, latestHdr, updatedftr);
+
+                                //fText = fText + "\n\n\n";
+                                fText = Regex.Replace(fText, @"^\s*$", "", RegexOptions.Multiline);
                             }
                             else
                             {
-                                fText = hdr + latestHdr + subscriberInfo + ft;
+                                fText = UpdateSESegmentCount(hdr, subscriberInfo, latestHdr, ft);
                             }
                             writeToText(fText, file.Name, editype, newpcn);
                         }
@@ -98,6 +103,43 @@ namespace ClaimsTestApp
             writeToText(unidentified, "unidentified.txt", string.Empty, string.Empty);
             Console.WriteLine("Search completed");
 
+        }
+
+        private static string UpdateSESegmentCount(string hdr, string subscriberInfo, string latestHdr, string updatedftr)
+        {
+            string fText;
+            string originalValue = string.Empty;
+            string updatemsg = hdr + latestHdr + subscriberInfo;
+            char SegDelimeter = hdr[105];
+            char ElemDelimeter = hdr[103];
+            string count = (updatemsg.Split(SegDelimeter).Count() - 2).ToString();
+            string[] arr = updatedftr.Split('\n');
+            for (int i = 0; i < arr.Length; i++)
+            {
+                char delimeter = delimeter = arr[i].Contains("*") ? '*' : arr[i].Contains(">") ? '>' : '|';
+                if (arr[i].Contains(string.Concat("SE" + delimeter)))
+                {
+                    string[] seArr = arr[i].Split(delimeter);
+                    seArr[1] = count.ToString();
+                    var lastValue = seArr.Last();
+                    foreach (var item in seArr)
+                    {
+                        if (item.Equals(lastValue))
+                        {
+                            originalValue = originalValue + item;
+                        }
+                        else
+                        {
+                            originalValue = originalValue + item + delimeter.ToString();
+                        }
+                    }
+                }
+            }
+            arr[0] = originalValue;
+            string updatedSEVal = ConvertStringArrayToString(arr);
+            updatedSEVal = Regex.Replace(updatedSEVal, @"^\s*$", "", RegexOptions.Multiline);
+            fText = hdr + latestHdr + subscriberInfo + updatedSEVal;
+            return fText;
         }
 
         private static string GetNewHeader(string sbrinfo, string editext)
@@ -187,9 +229,9 @@ namespace ClaimsTestApp
                 }
                 List<string> list = new List<string>(segmentedArr);
                 if (SEcheck != true)
-                {                    
-                    list.RemoveRange(HLIndex, segmentedArr.Length - HLIndex);                   
-                }                
+                {
+                    list.RemoveRange(HLIndex, segmentedArr.Length - HLIndex);
+                }
                 finalOutput = ConvertStringArrayToString(list.ToArray());
             }
             catch (Exception ex)
@@ -252,6 +294,7 @@ namespace ClaimsTestApp
             foreach (string value in array)
             {
                 builder.Append(value);
+                builder.Append('\n');
 
             }
             return builder.ToString();
