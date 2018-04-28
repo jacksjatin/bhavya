@@ -104,6 +104,17 @@ namespace IMIAcknowledgementValidator
                     else
                     {
                         helpers.MoveFile(Path.Combine(TrackingLocation, fileName), Path.Combine(ReconcileLocation, fileName), true);
+                        bool isMail = false;
+                        Boolean.TryParse(ConfigurationManager.AppSettings["isMail"], out isMail);
+                        StringBuilder sb = new StringBuilder();
+                        if (isMail)
+                        {
+                            sb.Append("For more information please check below files" + "\n");
+                            sb.Append("IMI Location: " + Path.Combine(ReconcileLocation, fileName) + "\n");                           
+                            string Subject = string.Format("Acknowledgement not found: {0}", fileName);
+                            string Msg = sb.ToString();
+                            helpers.SendMail(Subject, Msg);
+                        }
                     }
                 }
                 else

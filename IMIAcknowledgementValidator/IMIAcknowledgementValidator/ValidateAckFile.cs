@@ -65,7 +65,7 @@ namespace IMIAcknowledgementValidator
                             sb.Append("ACK Location: " + Path.Combine(ReconcileLocation, fi.Name) + "\n");
                             string Subject = string.Format("Document Rejected: {0}", fi.Name);
                             string Msg = sb.ToString();
-                            SendMail(Subject, Msg);
+                            helpers.SendMail(Subject, Msg);
                         }
                     }
                 }
@@ -97,42 +97,6 @@ namespace IMIAcknowledgementValidator
             return source.IndexOf(value, comp) > -1;
         }
         
-        public void SendMail(string Subject,string Message)
-        {
-            try
-            {
-                string smtpAddress = ConfigurationManager.AppSettings["smtpAddress"].ToString();
-                string emailFrom = ConfigurationManager.AppSettings["emailFrom"].ToString();
-                string password = ConfigurationManager.AppSettings["password"].ToString();
-                string emailTo = ConfigurationManager.AppSettings["emailTo"].ToString();
-                int portNumber = 587;
-                bool enableSSL = true;                
-                string subject = Subject;
-                string body = Message;
-                MailMessage mail = new MailMessage();
-                mail.From = new MailAddress(emailFrom);
-                mail.To.Add(emailTo);
-                mail.Subject = subject;
-                mail.Body = body;
-                mail.IsBodyHtml = true;
-                using (SmtpClient smtp = new SmtpClient(smtpAddress, portNumber))
-                {
-                    try
-                    {
-                        smtp.Credentials = new NetworkCredential(emailFrom, password);
-                        smtp.EnableSsl = enableSSL;
-                        smtp.Send(mail);
-                    }
-                    catch (Exception ex)
-                    {
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
+        
     }
 }
