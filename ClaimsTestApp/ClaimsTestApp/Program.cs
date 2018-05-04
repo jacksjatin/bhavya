@@ -13,7 +13,6 @@ namespace ClaimsTestApp
 {
     class Program
     {
-
         static void Main(string[] args)
         {
             string oldpcn = string.Empty;
@@ -65,6 +64,12 @@ namespace ClaimsTestApp
                             string subscriberInfo = GetSubscriberInfo(editext, contract, oldpcn, ref secheck);
                             string latestHdr = GetNewHeader(subscriberInfo.Split('\n')[0], editext);
                             subscriberInfo = UpdatePatientCNumber(subscriberInfo, oldpcn, newpcn);
+                            int clmcount = Regex.Matches(subscriberInfo, "CLM").Count;
+                            if (clmcount > 1)
+                            {
+                                string str = processMultiCLMS(subscriberInfo, newpcn, amount);
+                                subscriberInfo = str;
+                            }
                             string newsubscriberInfo = FormateSubscriberInfo(subscriberInfo, secheck);
                             if (newsubscriberInfo != "")
                             {
@@ -86,7 +91,7 @@ namespace ClaimsTestApp
                                 fText = UpdateSESegmentCount(hdr, subscriberInfo, latestHdr, ft);
                             }
                             File.WriteAllText(@"C:\Jatin\filedep2\EDI\IN.txt", fText);
-                          //  writeToText(fText, file.Name, editype, newpcn);
+                            //  writeToText(fText, file.Name, editype, newpcn);
                         }
                         sreader.Close();
                         fstream.Close();
@@ -104,6 +109,65 @@ namespace ClaimsTestApp
             writeToText(unidentified, "unidentified.txt", string.Empty, string.Empty);
             Console.WriteLine("Search completed");
 
+        }
+
+        private static string processMultiCLMS(string subscriberInfo, string oldpcn, string amount)
+        {
+            string[] arr = subscriberInfo.Split('\n');
+            int startIndex = 0;
+
+            List<int> N4index = new List<int>();
+            List<int> DTPIndex = new List<int>();
+
+            int temp = 0;
+            int endIndex = 0;
+
+            for (int i = 0; i < arr.Length; i++)
+            {
+                char delimeter = delimeter = arr[i].Contains("*") ? '*' : arr[i].Contains(">") ? '>' : '|';
+                if (arr[i].Contains(string.Concat("CLM" + delimeter)) && arr[i].Contains(oldpcn) && arr[i].Contains(amount))
+                {
+                    startIndex = i;
+                }
+
+                if(arr[i].Contains("N4"+delimeter))
+                {
+                    N4index.Add(i);
+                }
+                if(arr[i].Contains("DTP"+delimeter))
+                {
+                    DTPIndex.Add(i);
+                }
+                if(startIndex > 0)
+                {
+                    if(arr[i].Contains("SV"))
+                    {
+                        endIndex = i;
+                        temp = startIndex;
+                        startIndex = 0;
+                    }
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+
+            for (int j = 0; j < arr.Length; j++)
+            {                              
+                if(j <= N4index[0])
+                {
+                    sb.Append(arr[j]);
+                }
+
+                if(j >= temp && j <=endIndex)
+                {
+                    sb.Append(arr[j]);
+                }
+
+                if(j >= DTPIndex[DTPIndex.Count -1] && j<=arr.Length -1)
+                {
+                    sb.Append(arr[j]);
+                }
+            }
+            return sb.ToString();
         }
 
         private static string UpdateSESegmentCount(string hdr, string subscriberInfo, string latestHdr, string updatedftr)
@@ -392,7 +456,7 @@ namespace ClaimsTestApp
         private static void writeToText(string text, string filename, string type, string npcn)
         {
 
-           
+
             if (type == "IN")
             {
                 filename = "InstOutput/" + npcn;
@@ -402,8 +466,8 @@ namespace ClaimsTestApp
                 filename = "ProfOutput/" + npcn;
             }
 
-            
-           
+
+
         }
         private static string GetSubscriberInfo(string message, string contractnum, string opcn, ref bool secheck)
         {
@@ -431,7 +495,7 @@ namespace ClaimsTestApp
                     {
                         if (!ContractSegment.Contains(opcn))
                         {
-                            totalText = totalText + ContractSegment;
+                            // totalText = totalText + ContractSegment;
                             ContractSegment = string.Empty;
                             if (segment.data.Contains(nm1) && segment.data.ToString().Contains(contractnum))
                             {
