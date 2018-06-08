@@ -114,10 +114,18 @@ namespace IMIFileGeneratorOutboundScheduler
                     var dictionary = _dicDmkMaps[dpkvalue];
                     for (int j = 0; j < dictionary.lstProcessKeys.Count; j++)
                     {
+
                         string key = dictionary.lstProcessKeys[j].dpkKey;
                         string position = dictionary.lstProcessKeys[j].dpkPostion;
-                        string dmkReqFieldValues = splitedline[int.Parse(position)];
-                        dictionary.lstProcessKeys[j].Actualvalue = dmkReqFieldValues;
+                        if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(position))
+                        {
+                            dictionary.lstProcessKeys[j].Actualvalue = "";
+                        }
+                        else
+                        {
+                            string dmkReqFieldValues = splitedline[int.Parse(position)];
+                            dictionary.lstProcessKeys[j].Actualvalue = dmkReqFieldValues;
+                        }
                     }
                 }
             }
@@ -150,10 +158,19 @@ namespace IMIFileGeneratorOutboundScheduler
                     foreach (var item in linekeys)
                     {
                         processKey = new ProcessKey();
-                        string[] strsplit = item.Split('_');
-                        processKey.dpkKey = strsplit[0];
-                        processKey.dpkPostion = strsplit[1];
-                        lstprocKeys.Add(processKey);
+                        if (string.IsNullOrEmpty(item))
+                        {
+                            processKey.dpkKey = "";
+                            processKey.dpkPostion = "";
+                            lstprocKeys.Add(processKey);
+                        }
+                        else
+                        {                            
+                            string[] strsplit = item.Split('_');
+                            processKey.dpkKey = strsplit[0];
+                            processKey.dpkPostion = strsplit[1];
+                            lstprocKeys.Add(processKey);
+                        }
                     }
                     objdmi = new DPKMap();
                     objdmi.strDpkValue = dpk;
