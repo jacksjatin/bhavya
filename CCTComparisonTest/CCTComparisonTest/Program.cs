@@ -11,9 +11,10 @@ namespace CCTComparisonTest
 {
     class Program
     {
+        static string[] EdiArr;
         static void Main(string[] args)
         {
-            string[] EdiArr = File.ReadAllLines(@"C:\Jatin\filedep2\IMI\CCT\837I-ND-20170728-tbc15.txt");
+            EdiArr = File.ReadAllLines(@"C:\Jatin\filedep2\IMI\CCT\837I-ND-20170728-tbc15.txt");
             List<claims> lst = new List<claims>();
             claims c = null;
             for (int i = 0; i < EdiArr.Length; i++)
@@ -45,9 +46,7 @@ namespace CCTComparisonTest
                 {
                     continue;
                 }
-
             }
-
 
             foreach (var item in lst)
             {
@@ -95,7 +94,7 @@ namespace CCTComparisonTest
                 //Get DCN
                 node = "CLAIM_TABLE";
                 xinsElement = from ele in xinsElem.Descendants(node)
-                           select ele;
+                              select ele;
                 if (xinsElement.Count() > 0)
                 {
                     foreach (XElement n in xinsElement)
@@ -106,6 +105,7 @@ namespace CCTComparisonTest
                         if (amount == ediAmount)
                         {
                             string rec = n.ToString();
+                            updatePCN(dcn, item);
                             count++;
                         }
                     }
@@ -118,7 +118,55 @@ namespace CCTComparisonTest
 
         }
 
-        private static string GetInsSumRes(string memberID,string contnum,string ediAmount)
+        public static void updatePCN2(string newPcn, claims item)
+        {
+
+            char delimeter = item.cLM.clmLineTxt.Contains("*") ? '*' : item.cLM.clmLineTxt.Contains(">") ? '>' : '|';
+            string[] oldcmlline = item.cLM.clmLineTxt.Split(delimeter);
+            string oldpcn = oldcmlline[1];
+            item.cLM.clmLineTxt = item.cLM.clmLineTxt.Replace(oldpcn, newPcn);
+
+
+        }
+
+
+        private static void updatePCN(string newPcn,claims item)
+        {
+            StreamWriter wtr = new StreamWriter(@"C:\Jatin\filedep2\IMI\CCT\837I-ND-20170728-tbc15-modif.txt");
+            var e = File.ReadLines(@"C:\Jatin\filedep2\IMI\CCT\837I-ND-20170728-tbc15.txt").GetEnumerator();
+            int lineno = item.cLM.clmLineNumber + 1; 
+            int counter = 0;
+            string line = string.Empty;
+            while (e.MoveNext())
+            {
+                counter++;
+                if (counter == lineno)
+                    line = replaceLogic(e.Current,newPcn);
+                else
+                    line = e.Current;
+                wtr.WriteLine(line);
+            }
+            wtr.Close();
+        }
+
+        private static string replaceLogic(string current,string newPcn)
+        {
+
+            char delimeter = delimeter = current.Contains("*") ? '*' : current.Contains(">") ? '>' : '|';
+            string[] oldcmlline = current.Split(delimeter);
+            string oldpcn = oldcmlline[1];
+            current = current.Replace(oldpcn, newPcn);
+            return current;
+        }
+
+        static void lineChanger(string newText, string fileName, int line_to_edit)
+        {
+            string[] arrLine = File.ReadAllLines(@"C:\Jatin\filedep2\IMI\CCT\837I-ND-20170728-tbc15.txt");
+            arrLine[line_to_edit - 1] = newText;
+            File.WriteAllLines(fileName, arrLine);
+        }
+
+        private static string GetInsSumRes(string memberID, string contnum, string ediAmount)
         {
             string insres = File.ReadAllText(@"C:\Jatin\filedep2\IMI\CCT\SoapResponse2.txt");
             string strFiledata = RemoveNameSpaces(insres);
@@ -126,10 +174,25 @@ namespace CCTComparisonTest
             return strFiledata;
         }
 
+        private static string FormateContactNumber(string conNum)
+        {
+            if (conNum.StartsWith("R"))
+            {
+                return conNum;
+            }
+            else
+            {
+                string modifiedCNum = new String(conNum.Where(Char.IsDigit).ToArray());
+                conNum = modifiedCNum;
+            }
+            return conNum;
+        }
+
         private static string GetMemberRecords(claims item)
         {
+            string cnm = FormateContactNumber(item.nML.contract);
             string memberinfoRes = File.ReadAllText(@"C:\Jatin\filedep2\IMI\CCT\SoapResponse1.txt");
-            string strFiledata = RemoveNameSpaces(memberinfoRes);            
+            string strFiledata = RemoveNameSpaces(memberinfoRes);
             strFiledata = strFiledata.Replace("xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\"", "");
             return strFiledata;
         }
