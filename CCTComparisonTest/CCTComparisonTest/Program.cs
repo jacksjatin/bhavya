@@ -52,6 +52,8 @@ namespace CCTComparisonTest
             {
                 processMemberResponse(item);
             }
+
+            File.WriteAllLines(@"C:\Jatin\filedep2\IMI\CCT\837I-ND-20170728-tbc15-modif.txt", EdiArr);
         }
 
         public static void processMemberResponse(claims item)
@@ -105,7 +107,7 @@ namespace CCTComparisonTest
                         if (amount == ediAmount)
                         {
                             string rec = n.ToString();
-                            updatePCN(dcn, item);
+                            updatePCN2(dcn, item);
                             count++;
                         }
                     }
@@ -125,7 +127,7 @@ namespace CCTComparisonTest
             string[] oldcmlline = item.cLM.clmLineTxt.Split(delimeter);
             string oldpcn = oldcmlline[1];
             item.cLM.clmLineTxt = item.cLM.clmLineTxt.Replace(oldpcn, newPcn);
-
+            EdiArr[item.cLM.clmLineNumber] = item.cLM.clmLineTxt;
 
         }
 
