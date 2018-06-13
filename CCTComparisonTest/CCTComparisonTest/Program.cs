@@ -2,58 +2,102 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Serialization;
+using static CCTComparisonTest.csvhelper;
 
 namespace CCTComparisonTest
 {
     class Program
     {
         static string[] EdiArr;
+        static List<csv> lstRec;
+        static string inputFile = string.Empty;
         static void Main(string[] args)
         {
-            EdiArr = File.ReadAllLines(@"C:\Jatin\filedep2\IMI\CCT\837I-ND-20170728-tbc15.txt");
-            List<claims> lst = new List<claims>();
-            claims c = null;
-            for (int i = 0; i < EdiArr.Length; i++)
+           
+            string[] files = Directory.GetFiles(@"C:\Jatin\filedep2\IMI\CCT\Inp");
+            lstRec = new List<CCTComparisonTest.csv>();
+            for (int j = 0; j < files.Length; j++)
             {
-                char delimeter = delimeter = EdiArr[i].Contains("*") ? '*' : EdiArr[i].Contains(">") ? '>' : '|';
-                if (EdiArr[i].StartsWith("NM1" + delimeter + "IL"))
+                EdiArr = File.ReadAllLines(files[j]);                            
+                List<claims> lst = new List<claims>();
+                claims c = null;
+                FileInfo fl = new FileInfo(files[j]);
+                inputFile = fl.Name.Replace(".edi", "");
+                for (int i = 0; i < EdiArr.Length; i++)
                 {
-                    c = new claims();
-                    NML nml = new NML();
-                    string[] nmlLine = EdiArr[i].Split(delimeter);
-                    nml.nmlLineNumber = i;
-                    nml.contract = nmlLine[9].ToString();
-                    nml.firstName = nmlLine[3].ToString();
-                    nml.nmlLineTxt = EdiArr[i];
-                    c.nML = nml;
+                    char delimeter = EdiArr[i].Contains("*") ? '*' : EdiArr[i].Contains(">") ? '>' : '|';
+                    if (EdiArr[i].StartsWith("NM1" + delimeter + "IL"))
+                    {
+                        c = new claims();
+                        NML nml = new NML();
+                        string[] nmlLine = EdiArr[i].Split(delimeter);
+                        nml.nmlLineNumber = i;
+                        nml.contract = nmlLine[9].ToString();
+                        nml.firstName = nmlLine[4].ToString();
+                        nml.nmlLineTxt = EdiArr[i];
+                        c.nML = nml;
+                    }
+                    else if (EdiArr[i].StartsWith("NM1" + delimeter + "QC"))
+                    {
+                        NM1QC nM1QC = new NM1QC();
+                        string[] nm1qcLine = EdiArr[i].Split(delimeter);
+                        nM1QC.isnm1qc = true;
+                        nM1QC.nm1qcFirstName = nm1qcLine[4];
+                        nM1QC.nm1qcLineNumber = i;
+                        nM1QC.nm1qcLineTxt = EdiArr[i];
+                        c.nm1qc = nM1QC;
+
+                    }
+                    else if (EdiArr[i].StartsWith("CLM" + delimeter))
+                    {
+                        CLM clm = new CLM();
+                        string[] clmLine = EdiArr[i].Split(delimeter);
+                        clm.clmLineNumber = i;
+                        clm.oldPcn = clmLine[1];
+                        clm.amount = clmLine[2];
+                        clm.clmLineTxt = EdiArr[i];
+                        c.cLM = clm;
+                        lst.Add(c);
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
-                else if (EdiArr[i].StartsWith("CLM" + delimeter))
+
+                foreach (var item in lst)
                 {
-                    CLM clm = new CLM();
-                    string[] clmLine = EdiArr[i].Split(delimeter);
-                    clm.clmLineNumber = i;
-                    clm.oldPcn = clmLine[1];
-                    clm.amount = clmLine[2];
-                    clm.clmLineTxt = EdiArr[i];
-                    c.cLM = clm;
-                    lst.Add(c);
+                    processMemberResponse(item);
                 }
-                else
-                {
-                    continue;
-                }
+
+                
+                File.WriteAllLines(Path.Combine(@"C:\Jatin\filedep2\IMI", fl.Name), EdiArr);
             }
 
-            foreach (var item in lst)
-            {
-                processMemberResponse(item);
-            }
+            WriteCSV(lstRec, @"C:\Jatin\filedep2\IMI\output.csv");
+        }
 
-            File.WriteAllLines(@"C:\Jatin\filedep2\IMI\CCT\837I-ND-20170728-tbc15-modif.txt", EdiArr);
+        public static void WriteCSV<T>(IEnumerable<T> items, string path)
+        {
+            Type itemType = typeof(T);
+            var props = itemType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                .OrderBy(p => p.Name);
+
+            using (var writer = new StreamWriter(path))
+            {
+                writer.WriteLine(string.Join(", ", props.Select(p => p.Name)));
+
+                foreach (var item in items)
+                {
+                    writer.WriteLine(string.Join(", ", props.Select(p => p.GetValue(item, null))));
+                }
+            }
         }
 
         public static void processMemberResponse(claims item)
@@ -66,52 +110,40 @@ namespace CCTComparisonTest
             string ediAmount = item.cLM.amount;
             string node = string.Empty;
             int count = 0;
-            XElement xElem = XElement.Load(new StringReader(mResponse));
-            IEnumerable<XElement> xElement = null;
 
-            //Get MemberID
-            node = "NORMemberInfoRecord";
-            xElement = from ele in xElem.Descendants(node)
-                       select ele;
-            if (xElement.Count() > 0)
+            CCTComparisonTest2.Envelope env1 = Deserialize<CCTComparisonTest2.Envelope>(mResponse);
+            foreach (var ob in env1.Body.NORMemberBPNSearchWSResponse.NORMemberBPNSearchWSResult.NORMemberInfoRecord)
             {
-                foreach (XElement n in xElement)
+                FirstName = ob.FirstName;                
+                if (item.nm1qc != null)
                 {
-                    FirstName = n.Element("FirstName").Value;
-                    MemberID = n.Element("MemberID").Value;
-                    if (FirstName == item.nML.firstName)
+                    if (FirstName == item.nm1qc.nm1qcFirstName)
                     {
-                        string rec = n.ToString();
+                        MemberID = ob.MemberID;
                         count++;
                     }
                 }
-            }
+                else
+                {
+                    if (FirstName == item.nML.firstName)
+                    {
+                        MemberID = ob.MemberID;
+                        count++;
+                    }
 
+                }
+            }
             if (count == 1)
             {
-                string InsSumResponse = GetInsSumRes(MemberID, contnum, ediAmount);
-                XElement xinsElem = XElement.Load(new StringReader(InsSumResponse));
-                IEnumerable<XElement> xinsElement = null;
-
-                //Get DCN
-                node = "CLAIM_TABLE";
-                xinsElement = from ele in xinsElem.Descendants(node)
-                              select ele;
-                if (xinsElement.Count() > 0)
+                int counter = 0;
+                bool isCont = true;
+                string dcn = "0";
+                //node = NewMethod(item, MemberID, contnum, ediAmount, ref count);
+                while (isCont)
                 {
-                    foreach (XElement n in xinsElement)
-                    {
-                        string contNum = n.Element("O_CONT_NUM_R").Value;
-                        string dcn = n.Element("O_DCN_NO_R").Value;
-                        string amount = n.Element("CHARGE").Value;
-                        if (amount == ediAmount)
-                        {
-                            string rec = n.ToString();
-                            updatePCN2(dcn, item);
-                            count++;
-                        }
-                    }
+                    Paging(item, MemberID, contnum,ref dcn, ediAmount, ref counter, ref isCont);
                 }
+
             }
             else
             {
@@ -120,30 +152,93 @@ namespace CCTComparisonTest
 
         }
 
+        private static void Paging(claims item, string MemberID, string contnum,ref string dcn, string ediAmount, ref int counter, ref bool isCont)
+        {
+            string InsSumResponse = GetInsSumRes(MemberID, contnum, ediAmount, dcn);           
+            Envelope env2 = Deserialize<Envelope>(InsSumResponse);
+            string tabledcn = string.Empty;
+            foreach (var obj in env2.Body.NORInstitutionalSumMWWSResponse.NORInstitutionalSumMWWSResult.Claim_Table.CLAIM_TABLE)
+            {
+                string contNum = obj.O_CONT_NUM_R;
+                tabledcn = obj.O_DCN_NO_R;
+                string amount = obj.CHARGE;
+                if (amount == ediAmount)
+                {
+                    counter++;
+                }
+            }
+
+            if (counter == 1)
+            {
+                updatePCN2(tabledcn, item);
+                isCont = false;
+                return;
+            }
+
+            if (env2.Body.NORInstitutionalSumMWWSResponse.NORInstitutionalSumMWWSResult.StrLL_DCN_NO_R.StartsWith("16") ||
+                env2.Body.NORInstitutionalSumMWWSResponse.NORInstitutionalSumMWWSResult.ERR_MSG.Contains("No Next")
+                )
+            {
+                isCont = false;
+                return;
+            }
+            dcn = env2.Body.NORInstitutionalSumMWWSResponse.NORInstitutionalSumMWWSResult.StrLL_DCN_NO_R;
+
+        }
+
+        public static T Deserialize<T>(string input) where T : class
+        {
+            System.Xml.Serialization.XmlSerializer ser = new System.Xml.Serialization.XmlSerializer(typeof(T));
+
+            using (StringReader sr = new StringReader(input))
+            {
+                return (T)ser.Deserialize(sr);
+            }
+        }
+
+        public static string Serialize<T>(T ObjectToSerialize)
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(ObjectToSerialize.GetType());
+
+            using (StringWriter textWriter = new StringWriter())
+            {
+                xmlSerializer.Serialize(textWriter, ObjectToSerialize);
+                return textWriter.ToString();
+            }
+        }
+
         public static void updatePCN2(string newPcn, claims item)
         {
-
+            csv c = new csv();
             char delimeter = item.cLM.clmLineTxt.Contains("*") ? '*' : item.cLM.clmLineTxt.Contains(">") ? '>' : '|';
             string[] oldcmlline = item.cLM.clmLineTxt.Split(delimeter);
             string oldpcn = oldcmlline[1];
             item.cLM.clmLineTxt = item.cLM.clmLineTxt.Replace(oldpcn, newPcn);
             EdiArr[item.cLM.clmLineNumber] = item.cLM.clmLineTxt;
+            c.clmtype = inputFile.StartsWith("837I") ? "IN" : "PR";
+            c.newpcn = newPcn;
+            c.dcn = oldpcn;
+            c.fileName = inputFile;
+
+            lstRec.Add(c);
+
+
 
         }
 
 
-        private static void updatePCN(string newPcn,claims item)
+        private static void updatePCN(string newPcn, claims item)
         {
             StreamWriter wtr = new StreamWriter(@"C:\Jatin\filedep2\IMI\CCT\837I-ND-20170728-tbc15-modif.txt");
             var e = File.ReadLines(@"C:\Jatin\filedep2\IMI\CCT\837I-ND-20170728-tbc15.txt").GetEnumerator();
-            int lineno = item.cLM.clmLineNumber + 1; 
+            int lineno = item.cLM.clmLineNumber + 1;
             int counter = 0;
             string line = string.Empty;
             while (e.MoveNext())
             {
                 counter++;
                 if (counter == lineno)
-                    line = replaceLogic(e.Current,newPcn);
+                    line = replaceLogic(e.Current, newPcn);
                 else
                     line = e.Current;
                 wtr.WriteLine(line);
@@ -151,7 +246,7 @@ namespace CCTComparisonTest
             wtr.Close();
         }
 
-        private static string replaceLogic(string current,string newPcn)
+        private static string replaceLogic(string current, string newPcn)
         {
 
             char delimeter = delimeter = current.Contains("*") ? '*' : current.Contains(">") ? '>' : '|';
@@ -168,9 +263,17 @@ namespace CCTComparisonTest
             File.WriteAllLines(fileName, arrLine);
         }
 
-        private static string GetInsSumRes(string memberID, string contnum, string ediAmount)
+        private static string GetInsSumRes(string memberID, string contnum, string ediAmount,string dcn)
         {
-            string insres = File.ReadAllText(@"C:\Jatin\filedep2\IMI\CCT\SoapResponse2.txt");
+            string insres = string.Empty;
+            if (dcn == "0")
+            {
+                insres = File.ReadAllText(@"C:\Jatin\filedep2\IMI\CCT\SoapResponse2.txt");
+            }
+            else
+            {
+                insres = File.ReadAllText(@"C:\Jatin\filedep2\IMI\CCT\"+ dcn +".txt");
+            }
             string strFiledata = RemoveNameSpaces(insres);
             strFiledata = strFiledata.Replace("xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\"", "");
             return strFiledata;
@@ -221,6 +324,15 @@ namespace CCTComparisonTest
     {
         public NML nML;
         public CLM cLM;
+        public NM1QC nm1qc;
+    }
+
+    public class csv
+    {
+        public string dcn { get; set; }
+        public string newpcn { get; set; }
+        public string clmtype { get; set; }
+        public string fileName { get; set; }
     }
 
     public class NML
@@ -237,5 +349,13 @@ namespace CCTComparisonTest
         public string amount;
         public string oldPcn;
         public string clmLineTxt;
+    }
+
+    public class NM1QC
+    {
+        public int nm1qcLineNumber;
+        public string nm1qcFirstName;
+        public string nm1qcLineTxt;
+        public bool isnm1qc;
     }
 }
