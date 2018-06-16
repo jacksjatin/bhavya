@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CCTComparisonScheduler", "CCTComparisonScheduler\CCTComparisonScheduler.csproj", "{29CE93A5-8DE5-433A-BD61-104D83A5DF3B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{29CE93A5-8DE5-433A-BD61-104D83A5DF3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29CE93A5-8DE5-433A-BD61-104D83A5DF3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29CE93A5-8DE5-433A-BD61-104D83A5DF3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29CE93A5-8DE5-433A-BD61-104D83A5DF3B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {88A9CD02-CC64-4D1E-82F3-6BEBF1A2A682}
+	EndGlobalSection
+EndGlobal

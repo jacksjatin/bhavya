@@ -24,60 +24,60 @@ namespace CCTComparisonTest
             lstRec = new List<CCTComparisonTest.csv>();
             for (int j = 0; j < files.Length; j++)
             {
-                EdiArr = File.ReadAllLines(files[j]);                            
-                List<claims> lst = new List<claims>();
-                claims c = null;
-                FileInfo fl = new FileInfo(files[j]);
-                inputFile = fl.Name.Replace(".edi", "");
-                for (int i = 0; i < EdiArr.Length; i++)
-                {
-                    char delimeter = EdiArr[i].Contains("*") ? '*' : EdiArr[i].Contains(">") ? '>' : '|';
-                    if (EdiArr[i].StartsWith("NM1" + delimeter + "IL"))
+                    EdiArr = File.ReadAllLines(files[j]);                            
+                    List<claims> lst = new List<claims>();
+                    claims c = null;
+                    FileInfo fl = new FileInfo(files[j]);
+                    inputFile = fl.Name.Replace(".edi", "");
+                    for (int i = 0; i < EdiArr.Length; i++)
                     {
-                        c = new claims();
-                        NML nml = new NML();
-                        string[] nmlLine = EdiArr[i].Split(delimeter);
-                        nml.nmlLineNumber = i;
-                        nml.contract = nmlLine[9].ToString();
-                        nml.firstName = nmlLine[4].ToString();
-                        nml.nmlLineTxt = EdiArr[i];
-                        c.nML = nml;
-                    }
-                    else if (EdiArr[i].StartsWith("NM1" + delimeter + "QC"))
-                    {
-                        NM1QC nM1QC = new NM1QC();
-                        string[] nm1qcLine = EdiArr[i].Split(delimeter);
-                        nM1QC.isnm1qc = true;
-                        nM1QC.nm1qcFirstName = nm1qcLine[4];
-                        nM1QC.nm1qcLineNumber = i;
-                        nM1QC.nm1qcLineTxt = EdiArr[i];
-                        c.nm1qc = nM1QC;
+                        char delimeter = EdiArr[i].Contains("*") ? '*' : EdiArr[i].Contains(">") ? '>' : '|';
+                        if (EdiArr[i].StartsWith("NM1" + delimeter + "IL"))
+                        {
+                            c = new claims();
+                            NML nml = new NML();
+                            string[] nmlLine = EdiArr[i].Split(delimeter);
+                            nml.nmlLineNumber = i;
+                            nml.contract = nmlLine[9].ToString();
+                            nml.firstName = nmlLine[4].ToString();
+                            nml.nmlLineTxt = EdiArr[i];
+                            c.nML = nml;
+                        }
+                        else if (EdiArr[i].StartsWith("NM1" + delimeter + "QC"))
+                        {
+                            NM1QC nM1QC = new NM1QC();
+                            string[] nm1qcLine = EdiArr[i].Split(delimeter);
+                            nM1QC.isnm1qc = true;
+                            nM1QC.nm1qcFirstName = nm1qcLine[4];
+                            nM1QC.nm1qcLineNumber = i;
+                            nM1QC.nm1qcLineTxt = EdiArr[i];
+                            c.nm1qc = nM1QC;
 
+                        }
+                        else if (EdiArr[i].StartsWith("CLM" + delimeter))
+                        {
+                            CLM clm = new CLM();
+                            string[] clmLine = EdiArr[i].Split(delimeter);
+                            clm.clmLineNumber = i;
+                            clm.oldPcn = clmLine[1];
+                            clm.amount = clmLine[2];
+                            clm.clmLineTxt = EdiArr[i];
+                            c.cLM = clm;
+                            lst.Add(c);
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
-                    else if (EdiArr[i].StartsWith("CLM" + delimeter))
-                    {
-                        CLM clm = new CLM();
-                        string[] clmLine = EdiArr[i].Split(delimeter);
-                        clm.clmLineNumber = i;
-                        clm.oldPcn = clmLine[1];
-                        clm.amount = clmLine[2];
-                        clm.clmLineTxt = EdiArr[i];
-                        c.cLM = clm;
-                        lst.Add(c);
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                }
 
-                foreach (var item in lst)
-                {
-                    processMemberResponse(item);
-                }
-
+                    foreach (var item in lst)
+                    {
+                        processMemberResponse(item);
+                    }
                 
-                File.WriteAllLines(Path.Combine(@"C:\Jatin\filedep2\IMI", fl.Name), EdiArr);
+                
+                    File.WriteAllLines(Path.Combine(@"C:\Jatin\filedep2\IMI", fl.Name), EdiArr);
             }
 
             WriteCSV(lstRec, @"C:\Jatin\filedep2\IMI\output.csv");
