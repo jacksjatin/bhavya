@@ -14,7 +14,7 @@ namespace IMIFileGeneratorOutboundScheduler
     {
         public string strDpkValue;
         public List<ProcessKey> lstProcessKeys;
-        public string imagePath;
+        public List<string> imagePath;
     }
 
     public class ProcessKey
@@ -53,26 +53,57 @@ namespace IMIFileGeneratorOutboundScheduler
                     {
                         str = str + ob.dpkKey + " " + ob.dpkPostion + " " + ob.Actualvalue + " ";
                     }
-                    str = str + " " + obj.imagePath;
+                    foreach (var img in obj.imagePath)
+                    {
+                        str = str + " " + obj.imagePath;
+                    }                   
                     sb.Append(str.ToString());
                     sb.Append("\n");
                 }
                 //genereim
 
-           string[] getImagePath = Directory.EnumerateFiles(InprocessLocation).
+                bool isFolder = false;
+
+               string folderName = inputPath.Name;
+               if(Directory.Exists(Path.Combine(InprocessLocation,folderName.Replace(".idx",""))))
+                {
+                    string[] getImagePath = Directory.EnumerateFiles(Path.Combine(InprocessLocation, folderName.Replace(".idx", ""))).
                     Where(fn => !Path.GetExtension(fn)
                     .Equals(".idx", StringComparison.OrdinalIgnoreCase)).ToArray();
+                    isFolder = true;
+                  string mergedImgPath =  findImagePath(getImagePath, folderName.Replace(".idx", ""));
+                }
+               else if(File.Exists(Path.Combine(InprocessLocation, folderName))) 
+                {
+                    string[] getImagePath = Directory.EnumerateFiles(InprocessLocation).
+                    Where(fn => !Path.GetExtension(fn)
+                    .Equals(".idx", StringComparison.OrdinalIgnoreCase)).ToArray();
+                }          
 
                 WriteOutputFile(Path.GetFileNameWithoutExtension(inputPath.FullName) + DateTime.Now.ToString("yyyyMMddhhmm") + ".imi", sb.ToString());
-                if (File.Exists(Path.Combine(InprocessLocation, inputPath.Name)))
-                    helpers.MoveFile(Path.Combine(InprocessLocation, inputPath.Name), Path.Combine(ArchiveLocation, inputPath.Name), true);
-                string searchPattern = inputPath.Name.Replace(".idx", "") + "*";
-                string[] fullFilePath = Directory.GetFiles(InprocessLocation, searchPattern);
-                FileInfo fi = new FileInfo(fullFilePath[0]);
-                if (File.Exists(Path.Combine(InprocessLocation, fi.Name)))
-                    helpers.MoveFile(Path.Combine(InprocessLocation, fi.Name), Path.Combine(ArchiveLocation, fi.Name), true);
-
-
+                if (isFolder)
+                {
+                    if (File.Exists(Path.Combine(InprocessLocation, inputPath.Name)))
+                        helpers.MoveFile(Path.Combine(InprocessLocation, inputPath.Name), Path.Combine(ArchiveLocation, inputPath.Name), true);
+                    if (Directory.Exists(Path.Combine(InprocessLocation, folderName.Replace(".idx", ""))))
+                    {
+                        if(Directory.Exists(Path.Combine(ArchiveLocation, folderName.Replace(".idx", ""))))
+                        {
+                            Directory.Delete(Path.Combine(ArchiveLocation, folderName.Replace(".idx", "")), true);
+                        }
+                        Directory.Move(Path.Combine(InprocessLocation, folderName.Replace(".idx", "")), Path.Combine(ArchiveLocation, folderName.Replace(".idx", "")));
+                    }
+                }
+                else
+                {
+                    if (File.Exists(Path.Combine(InprocessLocation, inputPath.Name)))
+                        helpers.MoveFile(Path.Combine(InprocessLocation, inputPath.Name), Path.Combine(ArchiveLocation, inputPath.Name), true);
+                    string searchPattern = inputPath.Name.Replace(".idx", "") + "*";
+                    string[] fullFilePath = Directory.GetFiles(InprocessLocation, searchPattern);
+                    FileInfo fi = new FileInfo(fullFilePath[0]);
+                    if (File.Exists(Path.Combine(InprocessLocation, fi.Name)))
+                        helpers.MoveFile(Path.Combine(InprocessLocation, fi.Name), Path.Combine(ArchiveLocation, fi.Name), true);
+                }
                 string destinationpath = "";
                 if (File.Exists(destinationpath))
                     helpers.CopyFile(destinationpath,
@@ -85,6 +116,21 @@ namespace IMIFileGeneratorOutboundScheduler
             }
         }
 
+
+        public string findImagePath(string[] sArry,string imgName)
+        {
+            string foundImgPath = string.Empty;
+            foreach (var item in sArry)
+            {
+                FileInfo fl = new FileInfo(item);
+                if(fl.Name.Contains(imgName))
+                {
+                    foundImgPath = fl.FullName;
+                    return foundImgPath;
+                }
+            }
+            return foundImgPath;
+        }
         public void WriteOutputFile(string filename, string content)
         {
             try
@@ -110,7 +156,15 @@ namespace IMIFileGeneratorOutboundScheduler
 
                     string dpkvalue = splitedline[28];
                     string imgPath = splitedline.Last();
-                    _dicDmkMaps[dpkvalue].imagePath = imgPath;
+                    if (_dicDmkMaps[dpkvalue].imagePath == null)
+                    {
+                        _dicDmkMaps[dpkvalue].imagePath = new List<string>();
+                        _dicDmkMaps[dpkvalue].imagePath.Add(imgPath);
+                    }
+                    else
+                    {
+                        _dicDmkMaps[dpkvalue].imagePath.Add(imgPath);
+                    }
                     var dictionary = _dicDmkMaps[dpkvalue];
                     for (int j = 0; j < dictionary.lstProcessKeys.Count; j++)
                     {

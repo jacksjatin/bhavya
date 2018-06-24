@@ -19,7 +19,11 @@ namespace CCTComparisonTest
         static string inputFile = string.Empty;
         static void Main(string[] args)
         {
+
            
+
+
+
             string[] files = Directory.GetFiles(@"C:\Jatin\filedep2\IMI\CCT\Inp");
             lstRec = new List<CCTComparisonTest.csv>();
             for (int j = 0; j < files.Length; j++)
@@ -161,7 +165,10 @@ namespace CCTComparisonTest
             {
                 string contNum = obj.O_CONT_NUM_R;
                 tabledcn = obj.O_DCN_NO_R;
-                string amount = obj.CHARGE;
+                string amount = obj.CHARGE;                
+                float f;
+                float.TryParse(ediAmount, out f);
+                ediAmount = string.Format("{0:0.00}", f);
                 if (amount == ediAmount)
                 {
                     counter++;

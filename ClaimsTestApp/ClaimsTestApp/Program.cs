@@ -22,6 +22,7 @@ namespace ClaimsTestApp
             string amount = string.Empty;
             string contract = string.Empty;
             string receiveddate = string.Empty;
+            string filePath = string.Empty;
 
             DataTable data = new DataTable();
             string unidentified = string.Empty;
@@ -42,6 +43,7 @@ namespace ClaimsTestApp
                 amount = row[8].ToString().Trim();
                 oldpcn = row[10].ToString().Trim();
                 newpcn = row[11].ToString().Trim();
+                filePath = row[12].ToString().Trim();
                 if (!string.IsNullOrEmpty(receiveddate))
                 {
                     edipath = Extract(receiveddate, editype);
@@ -49,11 +51,11 @@ namespace ClaimsTestApp
                 if (!string.IsNullOrEmpty(edipath))
                 {
                     edipath = @"C:\Jatin\filedep2\IMI\Batch1";
-                    DirectoryInfo di = new DirectoryInfo(edipath);
-                    var edifiles = di.GetFiles();
-                    foreach (var file in edifiles)
-                    {
-                        FileStream fstream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
+                    //DirectoryInfo di = new DirectoryInfo(edipath);
+                    //var edifiles = di.GetFiles();
+                    //foreach (var file in edifiles)
+                    //{
+                        FileStream fstream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
                         StreamReader sreader = new StreamReader(fstream);
                         string editext = sreader.ReadToEnd();
                         if (editext.Contains(contract) && (editext.Contains(oldpcn + "*" + amount) || editext.Contains(oldpcn + ">" + amount) || editext.Contains(oldpcn + "|" + amount)))
@@ -103,7 +105,7 @@ namespace ClaimsTestApp
                         {
                             break;
                         }
-                    }
+                   // }
                     Console.WriteLine("Search completed");
                     //if (statuscheck == false)
                     //{
@@ -413,10 +415,10 @@ namespace ClaimsTestApp
             {
                 ftrArr[2] = ftrline2.ToString() + "~\r";
             }
-            else
-            {
-                return "";
-            }
+            //else
+            //{
+            //    return "";
+            //}
             return ConvertStringArrayToString(ftrArr);
         }
 

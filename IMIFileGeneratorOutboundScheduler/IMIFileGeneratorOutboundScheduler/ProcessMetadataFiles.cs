@@ -134,7 +134,9 @@ namespace IMIFileGeneratorOutboundScheduler
                         Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), imiName), true);
                     fileNames.Add(imiName);
                 }
-                ZipFile.CreateFromDirectory(di.FullName, Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), zipName));
+                // ZipFile.CreateFromDirectory(di.FullName, Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), zipName));
+
+                Directory.Move(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name), Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), di.Name));
                 if (Directory.Exists(di.FullName))
                 {
                     Directory.Delete(di.FullName, true);
