@@ -68,7 +68,13 @@ namespace IMIFileGeneratorOutboundScheduler.HelperClasses
                 {
                     try
                     {
-                        File.Move(Path.Combine(sourceLoc, file), Path.Combine(DestLoc, file));
+                        string searchPattern = file.Replace(".idx", "") + "*";
+                        string[] fullFilePath = Directory.GetFiles(sourceLoc, searchPattern);
+                        if (fullFilePath.Length > 1)
+                        {
+                            FileInfo fi = new FileInfo(fullFilePath[0]);
+                            File.Move(Path.Combine(sourceLoc, file), Path.Combine(DestLoc, file));
+                        }
                     }
                     catch (Exception fileEx)
                     {
@@ -96,8 +102,11 @@ namespace IMIFileGeneratorOutboundScheduler.HelperClasses
                     {
                         string searchPattern = file.Replace(".idx", "") + "*";
                         string[] fullFilePath = Directory.GetFiles(sourceLoc, searchPattern);
-                        FileInfo fi = new FileInfo(fullFilePath[0]);
-                        File.Move(Path.Combine(sourceLoc, fi.Name), Path.Combine(DestLoc, fi.Name));
+                        if (fullFilePath.Length > 1)
+                        {
+                            FileInfo fi = new FileInfo(fullFilePath[0]);
+                            File.Move(Path.Combine(sourceLoc, fi.Name), Path.Combine(DestLoc, fi.Name));
+                        }
                     }
                     catch (Exception fileEx)
                     {

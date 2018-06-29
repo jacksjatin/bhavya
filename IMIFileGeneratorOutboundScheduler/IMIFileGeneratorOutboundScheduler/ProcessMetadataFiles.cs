@@ -90,7 +90,11 @@ namespace IMIFileGeneratorOutboundScheduler
                             FileInfo fileInfo = new FileInfo(Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), list[fileCount]));
                             fileName = list[fileCount].ToString();
                             // MoveToDealerDirectory(fileInfo);
-                            ProcessObj.ProcessFolders(fileInfo);
+                            if (File.Exists(fileInfo.FullName))
+                            {
+                                ProcessObj.ProcessFolders(fileInfo);
+                            }                            
+                            Console.ReadLine();
                             fileCount++;
                             if (fileCount == list.Count)
                             {
@@ -103,6 +107,7 @@ namespace IMIFileGeneratorOutboundScheduler
                         {
                             //continue
                         }
+                       
                     }
 
                     #endregion
@@ -133,15 +138,18 @@ namespace IMIFileGeneratorOutboundScheduler
                     helpers.MoveFile(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), imiName),
                         Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), imiName), true);
                     fileNames.Add(imiName);
+                    if (Directory.Exists(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name)))
+                    {
+                        Directory.Move(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name), Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), di.Name));
+                        if (Directory.Exists(di.FullName))
+                        {
+                            Directory.Delete(di.FullName, true);
+                        }
+                    }
                 }
                 // ZipFile.CreateFromDirectory(di.FullName, Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), zipName));
 
-                Directory.Move(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name), Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), di.Name));
-                if (Directory.Exists(di.FullName))
-                {
-                    Directory.Delete(di.FullName, true);
-
-                }
+               
             }
 
         }
