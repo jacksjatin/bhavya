@@ -101,12 +101,16 @@ namespace IMIFileGeneratorOutboundScheduler.HelperClasses
                     try
                     {
                         string searchPattern = file.Replace(".idx", "") + "*";
-                        string[] fullFilePath = Directory.GetFiles(sourceLoc, searchPattern);
-                        if (fullFilePath.Length > 1)
+                        //string[] fullFilePath = Directory.GetFiles(sourceLoc, searchPattern);
+                        DirectoryInfo dir = new DirectoryInfo(sourceLoc);
+                        FileInfo[] files = dir.GetFiles(searchPattern, SearchOption.TopDirectoryOnly)
+                        .Where(f => f.Extension != ".idx").ToArray<FileInfo>();
+                        if (files.Length > 0)
                         {
-                            FileInfo fi = new FileInfo(fullFilePath[0]);
+                            FileInfo fi = files[0];
                             File.Move(Path.Combine(sourceLoc, fi.Name), Path.Combine(DestLoc, fi.Name));
                         }
+                       
                     }
                     catch (Exception fileEx)
                     {

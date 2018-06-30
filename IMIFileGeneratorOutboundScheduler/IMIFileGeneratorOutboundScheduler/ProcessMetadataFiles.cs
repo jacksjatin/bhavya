@@ -94,7 +94,7 @@ namespace IMIFileGeneratorOutboundScheduler
                             {
                                 ProcessObj.ProcessFolders(fileInfo);
                             }                            
-                            Console.ReadLine();
+                            //Console.ReadLine();
                             fileCount++;
                             if (fileCount == list.Count)
                             {

@@ -75,9 +75,14 @@ namespace IMIFileGeneratorOutboundScheduler
                 }
                else if(File.Exists(Path.Combine(InprocessLocation, folderName))) 
                 {
-                    string[] getImagePath = Directory.EnumerateFiles(InprocessLocation).
-                    Where(fn => !Path.GetExtension(fn)
-                    .Equals(".idx", StringComparison.OrdinalIgnoreCase)).ToArray();
+
+                    DirectoryInfo dir = new DirectoryInfo(InprocessLocation);
+                    FileInfo[] files = dir.GetFiles(folderName.Replace(".idx", "")+"*", SearchOption.TopDirectoryOnly)
+                    .Where(f => f.Extension != ".idx").ToArray<FileInfo>();
+                    //string[] getImagePath = Directory.EnumerateFiles(InprocessLocation).
+                    //Where(fn => !Path.GetExtension(fn)
+                    //.Equals(".idx", StringComparison.OrdinalIgnoreCase)).ToArray();
+                    string s = files[0].FullName.ToString();
                 }          
 
                 WriteOutputFile(Path.GetFileNameWithoutExtension(inputPath.FullName) + DateTime.Now.ToString("yyyyMMddhhmm") + ".imi", sb.ToString());
