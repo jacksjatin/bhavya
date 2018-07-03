@@ -140,7 +140,8 @@ namespace IMIFileGeneratorOutboundScheduler
                     fileNames.Add(imiName);
                     if (Directory.Exists(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name)))
                     {
-                        Directory.Move(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name), Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), di.Name));
+                        Directory.Move(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name),
+                            Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), di.Name));
                         if (Directory.Exists(di.FullName))
                         {
                             Directory.Delete(di.FullName, true);

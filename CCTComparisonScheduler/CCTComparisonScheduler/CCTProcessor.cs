@@ -12,7 +12,7 @@ namespace CCTComparisonScheduler
 {
     public class CCTProcessor
     {
-        public string[] EdiArr;       
+        public string[] EdiArr;
         public string inputFile = string.Empty;
         public List<csv> lstcsv = new List<csv>();
         private Helpers helpers;
@@ -27,52 +27,74 @@ namespace CCTComparisonScheduler
         {
             helpers = new Helpers();
         }
-        public void CompareContract(FileInfo fi,ref List<csv> lstRec,ref int totalClaims, ref int totalClaimsUpdated, ref int totalClaimsMatched, ref 
+        public void CompareContract(FileInfo fi, ref List<csv> lstRec, ref int totalClaims, ref int totalClaimsUpdated, ref int totalClaimsMatched, ref
             int totalMembersMatched, ref int totalUnknownContracts, ref int totalUnknownClaim
             )
         {
 
             EdiArr = File.ReadAllLines(fi.FullName);
             List<claims> lst = new List<claims>();
-            claims c = null;            
+            bool NMLSeg = false, DTPSeg = false;
+            claims c = null;
             inputFile = fi.Name.Replace(".edi", "");
             for (int i = 0; i < EdiArr.Length; i++)
             {
                 char delimeter = EdiArr[i].Contains("*") ? '*' : EdiArr[i].Contains(">") ? '>' : '|';
                 if (EdiArr[i].StartsWith("NM1" + delimeter + "IL"))
                 {
-                    c = new claims();
-                    NML nml = new NML();
-                    string[] nmlLine = EdiArr[i].Split(delimeter);
-                    nml.nmlLineNumber = i;
-                    nml.contract = nmlLine[9].ToString();
-                    nml.firstName = nmlLine[4].ToString();
-                    nml.nmlLineTxt = EdiArr[i];
-                    c.nML = nml;
+                    if (EdiArr[i - 1].StartsWith("SBR" + delimeter))
+                    {
+                        c = new claims();
+                        NML nml = new NML();
+                        string[] nmlLine = EdiArr[i].Split(delimeter);
+                        nml.nmlLineNumber = i;
+                        nml.contract = nmlLine[9].ToString();
+                        nml.firstName = nmlLine[4].ToString();
+                        nml.nmlLineTxt = EdiArr[i];
+                        c.nML = nml;
+                        NMLSeg = true;
+                        DTPSeg = true;
+                    }
+                    else
+                    {
+                        NMLSeg = false;
+                    }
                 }
-                else if (EdiArr[i].StartsWith("NM1" + delimeter + "QC"))
+                if (NMLSeg)
                 {
-                    NM1QC nM1QC = new NM1QC();
-                    string[] nm1qcLine = EdiArr[i].Split(delimeter);
-                    nM1QC.isnm1qc = true;
-                    nM1QC.nm1qcFirstName = nm1qcLine[4];
-                    nM1QC.nm1qcLineNumber = i;
-                    nM1QC.nm1qcLineTxt = EdiArr[i];
-                    c.nm1qc = nM1QC;
-                    
-
+                    if (EdiArr[i].StartsWith("NM1" + delimeter + "QC"))
+                    {
+                        NM1QC nM1QC = new NM1QC();
+                        string[] nm1qcLine = EdiArr[i].Split(delimeter);
+                        nM1QC.isnm1qc = true;
+                        nM1QC.nm1qcFirstName = nm1qcLine[4];
+                        nM1QC.nm1qcLineNumber = i;
+                        nM1QC.nm1qcLineTxt = EdiArr[i];
+                        c.nm1qc = nM1QC;
+                    }
+                    else if (EdiArr[i].StartsWith("CLM" + delimeter))
+                    {
+                        CLM clm = new CLM();
+                        string[] clmLine = EdiArr[i].Split(delimeter);
+                        clm.clmLineNumber = i;
+                        clm.oldPcn = clmLine[1];
+                        clm.amount = clmLine[2];
+                        clm.clmLineTxt = EdiArr[i];
+                        c.cLM = clm;
+                        totalClaimsCur++;
+                    }
                 }
-                else if (EdiArr[i].StartsWith("CLM" + delimeter))
+                if (EdiArr[i].StartsWith("DTP" + delimeter))
                 {
-                    CLM clm = new CLM();
-                    string[] clmLine = EdiArr[i].Split(delimeter);
-                    clm.clmLineNumber = i;
-                    clm.oldPcn = clmLine[1];
-                    clm.amount = clmLine[2];
-                    clm.clmLineTxt = EdiArr[i];
-                    c.cLM = clm;
-                    lst.Add(c);
-                    totalClaimsCur++;
+                    if (DTPSeg)
+                    {
+                        DTP dTP = new DTP();
+                        dTP.dtpLineNumber = i;
+                        dTP.dtpLineTxt = EdiArr[i];
+                        c.dTP = dTP;
+                        lst.Add(c);
+                        DTPSeg = false;
+                    }
                 }
                 else
                 {
@@ -103,7 +125,7 @@ namespace CCTComparisonScheduler
                 if (File.Exists(Path.Combine(InprocessLocation, fi.Name)))
                     helpers.MoveFile(Path.Combine(InprocessLocation, fi.Name), Path.Combine(suppressedLocation, fi.Name), true);
             }
-            
+
         }
 
         public void processMemberResponse(claims item)
@@ -295,6 +317,7 @@ namespace CCTComparisonScheduler
     {
         public NML nML;
         public CLM cLM;
+        public DTP dTP;
         public NM1QC nm1qc;
     }
 
@@ -308,7 +331,7 @@ namespace CCTComparisonScheduler
 
     public class NML
     {
-        public int nmlLineNumber ;
+        public int nmlLineNumber;
         public string contract;
         public string firstName;
         public string nmlLineTxt;
@@ -320,6 +343,13 @@ namespace CCTComparisonScheduler
         public string amount;
         public string oldPcn;
         public string clmLineTxt;
+    }
+
+    public class DTP
+    {
+        public int dtpLineNumber;
+        public string date;
+        public string dtpLineTxt;
     }
 
     public class NM1QC
