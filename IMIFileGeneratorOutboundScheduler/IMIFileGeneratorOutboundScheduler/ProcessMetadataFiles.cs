@@ -135,17 +135,31 @@ namespace IMIFileGeneratorOutboundScheduler
 
                 if (File.Exists(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), imiName)))
                 {
-                    helpers.MoveFile(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), imiName),
-                        Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), imiName), true);
-                    fileNames.Add(imiName);
-                    if (Directory.Exists(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name)))
+                    string filePath = Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), imiName);
+                    string[] splitedline = File.ReadAllText(filePath).Split('|');
+                    string dpkvalue = splitedline[28];
+                    string imgPath = splitedline.Last();
+                    FileInfo fli = new FileInfo(imgPath);
+
+                    if (File.Exists(Path.Combine(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name), fli.Name)))
                     {
-                        Directory.Move(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name),
-                            Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), di.Name));
-                        if (Directory.Exists(di.FullName))
+
+                        helpers.MoveFile(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), imiName),
+                            Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), imiName), true);
+                        fileNames.Add(imiName);
+                        if (Directory.Exists(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name)))
                         {
-                            Directory.Delete(di.FullName, true);
+                            Directory.Move(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name),
+                                Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), di.Name));
+                            if (Directory.Exists(di.FullName))
+                            {
+                                Directory.Delete(di.FullName, true);
+                            }
                         }
+                    }
+                    else
+                    {
+                        continue;
                     }
                 }
                 // ZipFile.CreateFromDirectory(di.FullName, Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), zipName));
