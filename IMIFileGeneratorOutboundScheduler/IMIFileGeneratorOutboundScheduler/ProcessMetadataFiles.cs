@@ -139,6 +139,7 @@ namespace IMIFileGeneratorOutboundScheduler
                     string[] splitedline = File.ReadAllText(filePath).Split('|');
                     string dpkvalue = splitedline[28];
                     string imgPath = splitedline.Last();
+                    imgPath = imgPath.Replace("\r\n", "");
                     FileInfo fli = new FileInfo(imgPath);
 
                     if (File.Exists(Path.Combine(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), di.Name), fli.Name)))
