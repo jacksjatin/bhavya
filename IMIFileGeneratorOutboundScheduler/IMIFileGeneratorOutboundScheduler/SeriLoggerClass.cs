@@ -10,10 +10,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace SeriLogger
+namespace IMIFileGeneratorOutboundScheduler
 {
     public class SeriLoggerClass
-    {        
+    {
         private static SeriLoggerClass mInstance;
         private static ILogger _Logger { get; set; }
         private static readonly object padlock = new object();
@@ -24,7 +24,7 @@ namespace SeriLogger
         {
 
         }
-        private SeriLoggerClass(string type,string arg2,string appName)
+        private SeriLoggerClass(string type, string arg2, string appName)
         {
             LoggerType = type;
             UserCode = arg2;
@@ -40,9 +40,9 @@ namespace SeriLogger
                 return mInstance;
             }
         }
-        public static void Create(string type,string userCode,string appName)
+        public static void Create(string type, string userCode, string appName)
         {
-            if(mInstance==null)
+            if (mInstance == null)
             {
                 mInstance = new SeriLoggerClass(type, userCode, appName);
             }
@@ -51,9 +51,9 @@ namespace SeriLogger
         {
             // var connStr = CustomConnection.GetDBConnectionString();
             var connStr = ConfigurationManager.ConnectionStrings["DBPath"].ConnectionString;
-            if(_Logger==null)
+            if (_Logger == null)
             {
-                if(LoggerType.ToUpper()=="DB")
+                if (LoggerType.ToUpper() == "DB")
                 {
                     //_Logger = new LoggerConfiguration()
                     //    .WriteTo.MSSqlServer(connStr, "imiLog", columnOptions: GetsqlColumnOptions())
@@ -92,11 +92,11 @@ namespace SeriLogger
             var colOptions = new ColumnOptions();
             colOptions.Store.Remove(StandardColumn.MessageTemplate);
             colOptions.Store.Remove(StandardColumn.Message);
-            colOptions.Store.Remove(StandardColumn.Properties);           
+            colOptions.Store.Remove(StandardColumn.Properties);
             colOptions.Store.Remove(StandardColumn.Exception);
             colOptions.Store.Remove(StandardColumn.Level);
             colOptions.Store.Remove(StandardColumn.TimeStamp);
-           
+
 
             colOptions.AdditionalDataColumns = new Collection<DataColumn>
             {
@@ -111,14 +111,14 @@ namespace SeriLogger
             colOptions.Properties.ExcludeAdditionalProperties = true;
             return colOptions;
         }
-        public void Debug(string fileName,string functionName,string message)
+        public void Debug(string fileName, string functionName, string message)
         {
             _Logger.ForContext("UserCode", UserCode)
                 .ForContext("AppName", ApplicationName)
                 .ForContext("FileName", fileName)
                 .ForContext("FunctionName", functionName).Debug(message);
         }
-        public void Information(string fileName,string functionName,string message)
+        public void Information(string fileName, string functionName, string message)
         {
             _Logger.ForContext("UserCode", UserCode)
                .ForContext("AppName", ApplicationName)
@@ -126,16 +126,16 @@ namespace SeriLogger
                .ForContext("FunctionName", functionName).Information(message);
         }
 
-        public void imiInfo(string CreatedTimestamp,string DPK,string FLD,string ImiFileName,
-            string ImiGenerated,string AckReceived, string UpdatedTimestamp)
+        public void imiInfo(string CreatedTimestamp, string DPK, string FLD, string ImiFileName,
+            string ImiGenerated, string AckReceived, string UpdatedTimestamp)
         {
             _Logger.ForContext("CreatedTimestamp", CreatedTimestamp)
-                .ForContext("DPK", DPK)                
+                .ForContext("DPK", DPK)
               .ForContext("FLD", FLD)
               .ForContext("ImiFileName", ImiFileName)
               .ForContext("ImiGenerated", ImiGenerated)
               .ForContext("AckReceived", AckReceived)
-              .ForContext("UpdatedTimestamp", UpdatedTimestamp).Information(""); 
+              .ForContext("UpdatedTimestamp", UpdatedTimestamp).Information("");
 
         }
         public void Warning(string fileName, string functionName, string message)

@@ -1,5 +1,11 @@
-﻿using System;
+﻿using IMIFileGeneratorOutboundScheduler.HelperClasses;
+using Serilog;
+using Serilog.Sinks.MSSqlServer;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Configuration;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,16 +14,19 @@ namespace IMIFileGeneratorOutboundScheduler
 {
     class MainEntry : IDisposable
     {
-        public enum ValidateArgs : int
+               public enum ValidateArgs : int
         {
             Success = 0,
             NoArgument = 1,
             InvalidParameter = 2,
             ExcessArguments = 4
-        }
+        }       
+
         private bool disposed = false;
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
+            
+
             bool IsSuccess = true;
             string errMsg = string.Empty;
 
@@ -77,7 +86,8 @@ namespace IMIFileGeneratorOutboundScheduler
             //request.ProcessFolders();
 
 
-        }
+        }       
+
         private static ValidateArgs ValidateParameters(string[] args)
         {
             ValidateArgs argsEnum = ValidateArgs.Success;
@@ -123,5 +133,6 @@ namespace IMIFileGeneratorOutboundScheduler
             }
         }
         #endregion
-    }
+
+            }
 }
