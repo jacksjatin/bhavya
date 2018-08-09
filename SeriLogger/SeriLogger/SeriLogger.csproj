@@ -63,6 +63,7 @@
     <Compile Include="ConnectionManager.cs" />
     <Compile Include="CustomConnection.cs" />
     <Compile Include="DBHelpers.cs" />
+    <Compile Include="IMIAckTable.cs" />
     <Compile Include="IMIRecon.cs" />
     <Compile Include="IMITable.cs" />
     <Compile Include="Nested.cs" />

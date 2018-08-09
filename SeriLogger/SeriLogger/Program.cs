@@ -49,13 +49,17 @@ namespace SeriLogger
             //loggers.imiInfo("2018-07-12 08:27:02.416", "LAW121", "30010", "wsdfghjhg55d", "TRUE", "", "2018-07-12 08:27:02.410");
 
             //string _ImiFileName = "wsdfghjhg55d";
-            //string imiFileQuery = "SELECT * from ImiReconcilation where ImiFileName=" + "'" + _ImiFileName + "'";
+
             //string _AckReceived = "TRUE";
 
-            //string updateQuery = "UPDATE ImiReconcilation SET AckReceived=@AckReceived where ImiFileName=@ImiFileName";
-            //DataSet ds = null;
+
             //CheckAndUpdateAckStatus(_ImiFileName, imiFileQuery, _AckReceived, updateQuery, ref ds);
             #endregion
+
+            // Ack Recieved Update
+            IMIAckTable ack = new IMIAckTable();
+            DataSet ds = null;
+            ack.CheckAndUpdateAckStatus("ImiFIleName", "TRUE", DateTime.Now.ToString(),ref ds);
 
             //This is General Log we can you use any where
             IMITable log = new IMITable();
@@ -68,20 +72,7 @@ namespace SeriLogger
               
         }
 
-        private int CheckAndUpdateAckStatus(string _ImiFileName, string imiFileQuery, string _AckReceived, string updateQuery, ref DataSet ds)
-        {
-            int res = 0;
-            ds = DBHelpers.ExecuteDS(imiFileQuery);
-            if (ds.Tables[0].Rows.Count > 0)
-            {
-                CommandType type = CommandType.Text;
-                SqlParameter[] parameterList = { new SqlParameter("@AckReceived",_AckReceived),
-                                                 new SqlParameter("@ImiFileName",_ImiFileName)
-                };
-                res = DBHelpers.ExecuteNonQuery(updateQuery, type, parameterList);
-            }
-            return res;
-        }
+       
         
     }
    
