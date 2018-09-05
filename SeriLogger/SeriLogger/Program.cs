@@ -20,6 +20,16 @@ namespace SeriLogger
         //}
         public static void Main(string[] args)
         {
+
+            CreateIncident id = new CreateIncident();
+            IncidentRequest ic = new IncidentRequest(); // incident model object request
+            ic.u_affectedci = "";
+            ic.u_caller_email = "";
+            ic.u_customer_reference_no_ = "";
+            id.creatInc(ic);
+
+
+            Console.WriteLine(((object)10).Equals(10));
             //string WriteTo = ConfigurationManager.AppSettings["WriteTo"];
             //SeriLoggerClass.Create("db", "imiLog", "IMI");
             //loggers = SeriLoggerClass.Instance;

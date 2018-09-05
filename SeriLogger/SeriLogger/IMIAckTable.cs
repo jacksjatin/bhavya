@@ -11,7 +11,7 @@ namespace SeriLogger
     class IMIAckTable
     {       
 
-        string updateQuery = "UPDATE ImiReconcilation SET AckReceived=@AckReceived where ImiFileName=@ImiFileName";
+        string updateQuery = "UPDATE ImiReconcilation SET AckReceived=@AckReceived,UpdatedTimestamp=@UpdatedTimestamp where ImiFileName=@ImiFileName";
 
         public int CheckAndUpdateAckStatus(string _ImiFileName, string _AckReceived,string _UpdatedTimeStamp, ref DataSet ds)
         {
