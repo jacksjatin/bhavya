@@ -64,8 +64,13 @@ namespace IMIFileGeneratorOutboundScheduler
 
                 bool isFolder = false;
 
-               string folderName = inputPath.Name;
-               if(Directory.Exists(Path.Combine(InprocessLocation,folderName.Replace(".idx",""))))
+                string idxcontent = File.ReadAllText(inputPath.FullName);
+                string[] allSegm = idxcontent.Split('|');
+                string imgPath = allSegm.Last();
+                FileInfo finf= new FileInfo(imgPath);
+                string folderName = finf.Directory.Name;
+                
+               if(Directory.Exists(Path.Combine(InprocessLocation, folderName)))
                 {
                     string[] getImagePath = Directory.EnumerateFiles(Path.Combine(InprocessLocation, folderName.Replace(".idx", ""))).
                     Where(fn => !Path.GetExtension(fn)

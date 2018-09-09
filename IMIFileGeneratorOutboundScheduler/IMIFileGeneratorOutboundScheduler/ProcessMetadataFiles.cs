@@ -62,29 +62,35 @@ namespace IMIFileGeneratorOutboundScheduler
                 List<string> list = null;
                 fileNames = new List<string>();
                 list = new List<string>();
+                //Read IDX Files 
+
+              //  ReadIDXImagePaths(totalCount);
+
+
                 // ProcessFoldersFirst 
                 string[] folderArr = Directory.GetDirectories(htAppConfig["OutboundSourceLocation"].ToString());
-                ProcessFolders(folderArr, ref fileNames);
+               // ProcessFolders(folderArr, ref fileNames);
 
                 list = helpers.GetFiles(htAppConfig["OutboundSourceLocation"].ToString(), totalCount, string.Format("*.idx"));
-               
+
                 int sleepTime = intervalTime;
-                if ((null == list || list.Count == 0) && (null == fileNames || fileNames.Count == 0))  return;
+                if ((null == list || list.Count == 0) && (null == fileNames || fileNames.Count == 0)) return;
 
                 //Moves the files to Inprocess
-                helpers.MoveFiles(list, htAppConfig["OutboundSourceLocation"].ToString(), htAppConfig["OutboundInProcessLocation"].ToString());
+                // helpers.MoveFiles(list, htAppConfig["OutboundSourceLocation"].ToString(), htAppConfig["OutboundInProcessLocation"].ToString());
+                helpers.MoveLatestFiles(list, htAppConfig["OutboundSourceLocation"].ToString(), htAppConfig["OutboundInProcessLocation"].ToString());
 
-                helpers.MoveImageFiles(list, htAppConfig["OutboundSourceLocation"].ToString(), htAppConfig["OutboundInProcessLocation"].ToString());
+                //helpers.MoveImageFiles(list, htAppConfig["OutboundSourceLocation"].ToString(), htAppConfig["OutboundInProcessLocation"].ToString());
                 //for (int i = 0; i < fileNames.Count; i++)
                 //{
                 //    ProcessObj.ProcessFolders(Path.Combine(htAppConfig["InputRootFolder"].ToString(), fileNames[i]));
                 //}
 
-                foreach (var item in fileNames)
-                {
-                    list.Add(item);
-                }
-            
+                //foreach (var item in fileNames)
+                //{
+                //    list.Add(item);
+                //}
+
 
 
                 for (int iIndex = 0; iIndex < batchCount; iIndex++)
@@ -106,7 +112,7 @@ namespace IMIFileGeneratorOutboundScheduler
                             if (File.Exists(fileInfo.FullName))
                             {
                                 ProcessObj.ProcessFolders(fileInfo);
-                            }                            
+                            }
                             //Console.ReadLine();
                             fileCount++;
                             if (fileCount == list.Count)
@@ -120,7 +126,7 @@ namespace IMIFileGeneratorOutboundScheduler
                         {
                             //continue
                         }
-                       
+
                     }
 
                     #endregion
@@ -138,6 +144,27 @@ namespace IMIFileGeneratorOutboundScheduler
             }
         }
 
+        private void ReadIDXImagePaths(int totalCount)
+        {
+            List<string> list = new List<string>();
+            list = helpers.GetFiles(htAppConfig["OutboundSourceLocation"].ToString(), totalCount, string.Format("*.idx"));
+
+            Dictionary<string, string> _dicIdxPairs = new Dictionary<string, string>();
+
+
+            foreach (var idxpath in list)
+            {
+                string idxcontent = File.ReadAllText(Path.Combine(htAppConfig["OutboundSourceLocation"].ToString(), idxpath));
+
+                string[] allSegm = idxcontent.Split('|');
+
+                string imgPath = allSegm.Last();
+                string key = idxpath.Replace(".idx", "");
+                if (!_dicIdxPairs.ContainsKey(key))
+                    _dicIdxPairs.Add(key, imgPath);
+            }
+
+        }
 
         public void imiInfo(string CreatedTimestamp, string DPK, string FLD, string ImiFileName,
            string ImiGenerated, string AckReceived, string UpdatedTimestamp)
@@ -216,7 +243,7 @@ namespace IMIFileGeneratorOutboundScheduler
                 }
                 // ZipFile.CreateFromDirectory(di.FullName, Path.Combine(htAppConfig["OutboundInProcessLocation"].ToString(), zipName));
 
-               
+
             }
 
         }

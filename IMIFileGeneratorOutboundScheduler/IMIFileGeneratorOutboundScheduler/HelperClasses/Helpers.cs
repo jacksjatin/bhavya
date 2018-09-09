@@ -89,6 +89,61 @@ namespace IMIFileGeneratorOutboundScheduler.HelperClasses
             }
         }
 
+        public void MoveLatestFiles(List<string> fileNames, string sourceLoc, string DestLoc)
+        {
+            //This method may still requires some modifications.
+            //Need to revisit later
+            try
+            {
+                string errorFileMessages = string.Empty;
+                foreach (string file in fileNames)
+                {
+                    try
+                    {
+                        string idxcontent = File.ReadAllText(Path.Combine(sourceLoc, file));
+                        string[] allSegm = idxcontent.Split('|');
+                        string imgPath = allSegm.Last();
+                        FileInfo fi = new FileInfo(imgPath);                       
+                        string folderName = fi.Directory.Name;
+
+                        if (folderName.ToUpper() == "INPUT")
+                        {
+                            if (File.Exists(fi.FullName))
+                            {
+                                File.Move(Path.Combine(sourceLoc, file), Path.Combine(DestLoc, file));
+                                File.Move(fi.FullName, Path.Combine(DestLoc, fi.Name));
+                            }
+                        }
+                        else
+                        {
+                            if (Directory.Exists(Path.Combine(sourceLoc, folderName)))
+                            {
+                                File.Move(Path.Combine(sourceLoc, file), Path.Combine(DestLoc, file));
+                                Directory.Move(Path.Combine(sourceLoc, folderName),
+                              Path.Combine(DestLoc, folderName));
+                                if (Directory.Exists(Path.Combine(sourceLoc, folderName)))
+                                {
+                                    Directory.Delete(Path.Combine(sourceLoc, folderName), true);
+                                }
+                            }
+                        }
+
+
+
+                    }
+                    catch (Exception fileEx)
+                    {
+                        errorFileMessages = errorFileMessages + fileEx + " " + file;
+                        continue;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(FormatErrorMessage(ex.Message));
+            }
+        }
+
         public void MoveImageFiles(List<string> fileNames, string sourceLoc, string DestLoc)
         {
             //This method may still requires some modifications.
@@ -110,7 +165,7 @@ namespace IMIFileGeneratorOutboundScheduler.HelperClasses
                             FileInfo fi = files[0];
                             File.Move(Path.Combine(sourceLoc, fi.Name), Path.Combine(DestLoc, fi.Name));
                         }
-                       
+
                     }
                     catch (Exception fileEx)
                     {
