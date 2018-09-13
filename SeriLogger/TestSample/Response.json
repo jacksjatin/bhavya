@@ -1,0 +1,41 @@
+﻿{
+  "result": {
+    "parent": "",
+    "caused_by": "",
+    "watch_list": "",
+    "upon_reject": "cancel",
+    "sys_updated_on": "2018-09-12",
+    "u_urgency": "",
+    "approval_history": "",
+    "skills": "",
+    "number": "INC0013052",
+    "state": "1",
+    "sys_created_by": "zx06777",
+    "knowledge": "false",
+    "order": "",
+    "u_event_primary_administrator": "",
+    "u_event_opened": "",
+    "cmdb_ci": {
+      "link": "",
+      "value": "4d69801gj88979210biug"
+    },
+    "u_event_last_notified": "",
+    "impact": "4",
+    "active": "true",
+    "priority": "3",
+    "sys_domain_path": "/",
+    "u_hmhs_phase": "",
+    "shot_description": "test 8",
+    "notify": "1",
+    "sys_class_name": "incident",
+    "sys_updated_by": "zx06777",
+    "u_phone": "",
+    "description": "test5..........",
+    "u_incident_priority": "4",
+    "sys_id": "245476fhki4478vjhvjhvhk",
+    "incident_state": "1",
+    "urgency": "2",
+    "u_incident_urgency": "2-High",
+    "severity": "3"
+  }
+}

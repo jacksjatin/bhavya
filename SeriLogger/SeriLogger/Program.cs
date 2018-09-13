@@ -20,7 +20,35 @@ namespace SeriLogger
         //}
         public static void Main(string[] args)
         {
+            #region ServiceNow
+            DataSet ds = null;
+            int res;
+            ServiceNowIncidents sc = new ServiceNowIncidents();
 
+            //Create Incident with Rejection Code
+            sc.CreateNewIncident("122SID", "ENC", "F000", "INC122", "", "", DateTime.Now.ToString());
+
+            //Create Incident with Segments
+            sc.CreateNewIncident("124SID", "ENC", "", "INC124", "P01", "", DateTime.Now.ToString());
+
+            //Create Incident with Exception
+            sc.CreateNewIncident("124SID", "", "", "INC124", "", "ACK NOT RECEIVED", DateTime.Now.ToString());
+
+            //Find Incident By RejectCode
+            res = sc.IncidentExistByRejectCode("ENC", "F000",ref ds);
+
+            //Find Incident By Segments
+            res = sc.IncidentExistsBySegment("ENC", "P01", ref ds);
+
+            //Find Incident By Exception
+            res = sc.IncidentExistsByException("ACK NOT RECEIVED", ref ds);
+
+            //Delete Incident
+            res = sc.DeleteIncident("INC122");
+
+            #endregion
+            
+            #region OldCode
             CreateIncident id = new CreateIncident();
             IncidentRequest ic = new IncidentRequest(); // incident model object request
             ic.u_affectedci = "";
@@ -40,9 +68,10 @@ namespace SeriLogger
             Console.WriteLine("Logs added");
             Console.Read();
             //loggers.Information("");
+            #endregion
         }
 
-        
+
         public void WriteToDB()
         {
             #region
