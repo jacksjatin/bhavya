@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace SeriLogger
 {
@@ -19,7 +20,8 @@ namespace SeriLogger
 
         //}
         public static void Main(string[] args)
-        {
+        {           
+
             #region ServiceNow
             DataSet ds = null;
             int res;
@@ -35,7 +37,7 @@ namespace SeriLogger
             sc.CreateNewIncident("124SID", "", "", "INC124", "", "ACK NOT RECEIVED", DateTime.Now.ToString());
 
             //Find Incident By RejectCode
-            res = sc.IncidentExistByRejectCode("ENC", "F000",ref ds);
+            res = sc.IncidentExistByRejectCode("ENC", "F000", ref ds);
 
             //Find Incident By Segments
             res = sc.IncidentExistsBySegment("ENC", "P01", ref ds);
@@ -47,7 +49,7 @@ namespace SeriLogger
             res = sc.DeleteIncident("INC122");
 
             #endregion
-            
+
             #region OldCode
             CreateIncident id = new CreateIncident();
             IncidentRequest ic = new IncidentRequest(); // incident model object request
@@ -98,24 +100,22 @@ namespace SeriLogger
             // Ack Recieved Update
             IMIAckTable ack = new IMIAckTable();
             DataSet ds = null;
-            ack.CheckAndUpdateAckStatus("ImiFIleName", "TRUE", DateTime.Now.ToString(),ref ds);
+            ack.CheckAndUpdateAckStatus("ImiFIleName", "TRUE", DateTime.Now.ToString(), ref ds);
 
             //This is General Log we can you use any where
             IMITable log = new IMITable();
-            log.imiLogEntry("UserCode", "AppName", "FileName", "Logged Event", "", LogType.Warning , "","","");
+            log.imiLogEntry("UserCode", "AppName", "FileName", "Logged Event", "", LogType.Warning, "", "", "");
 
 
             // This is in IMI Generation Method
             IMIRecon recLog = new IMIRecon();
             recLog.imiReconLog("2018-07-12 08:27:02.410", "DPK", "FLD", "ImiFIleName", "TRUE", "FLASE", "2018-07-12 08:27:02.410");
-              
+
         }
 
-       
-        
     }
-   
 
-   
+
+
 }
 

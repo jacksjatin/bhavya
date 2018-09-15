@@ -33,6 +33,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\MVSFTPUtility\bin\Debug\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.2.7.1\lib\net45\Serilog.dll</HintPath>
       <Private>True</Private>
@@ -63,6 +67,7 @@
   <ItemGroup>
     <Compile Include="ConnectionManager.cs" />
     <Compile Include="CreateIncident.cs" />
+    <Compile Include="LookUpIncident.cs" />
     <Compile Include="ServiceNowIncidents.cs" />
     <Compile Include="CustomConnection.cs" />
     <Compile Include="DBHelpers.cs" />
