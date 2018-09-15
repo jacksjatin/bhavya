@@ -45,9 +45,6 @@ namespace SeriLogger
             //Find Incident By Exception
             res = sc.IncidentExistsByException("ACK NOT RECEIVED", ref ds);
 
-            //Delete Incident
-            res = sc.DeleteIncident("INC122");
-
             #endregion
 
             #region OldCode

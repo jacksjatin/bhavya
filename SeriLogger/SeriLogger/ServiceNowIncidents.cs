@@ -66,19 +66,6 @@ namespace SeriLogger
             return res;
         }
 
-        public int DeleteIncident(string IncidentNumber)
-        {
-            string deleteQuery = "DELETE FROM imiServiceNow where IncidentNumber=" + "'" + IncidentNumber + "' ";
-            string imiCheckIncQuery = "SELECT * from imiServiceNow where IncidentNumber=" + "'" + IncidentNumber + "' ";
-            int res = 0;
-            DataSet ds = DBHelpers.ExecuteDS(imiCheckIncQuery);
-            if (ds.Tables[0].Rows.Count > 0)
-            {
-                CommandType type = CommandType.Text;
-                res = DBHelpers.ExecuteNonQuery(deleteQuery, type);
-            }
-            return res;
-        }
     }
 
     public class ImiIncidentModel
