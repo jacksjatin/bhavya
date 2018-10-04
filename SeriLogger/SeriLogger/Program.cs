@@ -28,9 +28,9 @@ namespace SeriLogger
             ServiceNowIncidents sc = new ServiceNowIncidents();
 
             //Create Incident with Rejection Code
-            sc.CreateNewIncident("122SID", "ENC", "F000", "INC122", "", "", DateTime.Now.ToString());
+            sc.CreateNewIncident("sysid123", "ENC", "F000", "INC122", "", "", DateTime.Now.ToString());
 
-            //Create Incident with Segments
+            //Create Incident with Segments  
             sc.CreateNewIncident("124SID", "ENC", "", "INC124", "P01", "", DateTime.Now.ToString());
 
             //Create Incident with Exception
@@ -44,6 +44,11 @@ namespace SeriLogger
 
             //Find Incident By Exception
             res = sc.IncidentExistsByException("ACK NOT RECEIVED", ref ds);
+
+
+            //Today Total Incidents Count
+            int totalCount = 0;
+            res = sc.GetTodayIncidentCount(ref totalCount);
 
             #endregion
 
