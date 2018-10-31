@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,14 +32,16 @@ namespace SeriLogger
             {
                 string strMessage = "DBHelpers.ExecuteDS(..) SqlException!\n " +
                     GetSQLExceptionText(e) + "\n\nSQL: " + strSQL;
-                rethrow = new Exception(strMessage);
+               // rethrow = new Exception(strMessage);
+                WriteToEventLog(strMessage, EventLogEntryType.Error);
             }
             catch (Exception e)
             {
                 string strMessage = "DBHelpers.ExecuteDS(..) failed!\n "
                     + e.Message
                     + "\nSQL: " + strSQL;
-                rethrow = new Exception(strMessage);
+                // rethrow = new Exception(strMessage);
+                WriteToEventLog(strMessage, EventLogEntryType.Error);
             }
             finally
             {
@@ -50,7 +53,8 @@ namespace SeriLogger
 
             if (rethrow != null)
             {
-                throw rethrow;
+                //throw rethrow;
+                WriteToEventLog(rethrow.Message, EventLogEntryType.Error);
             }
 
             return ds;
@@ -106,14 +110,17 @@ namespace SeriLogger
             {
                 string strMessage = "DBHelpers.ExecuteNonQuery(..) SqlException!\n " +
                     GetSQLExceptionText(e) + "\n\nSQL: " + commandText;
-                rethrow = new Exception(strMessage);
+               // rethrow = new Exception(strMessage);
+
+                WriteToEventLog(strMessage, EventLogEntryType.Error);
             }
             catch (Exception e)
             {
                 string strMessage = "DBHelpers.ExecuteNonQuery(..) failed!\n "
                     + e.Message
                     + "\nSQL: " + commandText;
-                rethrow = new Exception(strMessage);
+                // rethrow = new Exception(strMessage);
+                WriteToEventLog(strMessage, EventLogEntryType.Error);
             }
             finally
             {
@@ -125,12 +132,26 @@ namespace SeriLogger
 
             if (rethrow != null)
             {
-                throw rethrow;
+                // throw rethrow;
+                WriteToEventLog(rethrow.Message, EventLogEntryType.Error);
             }
 
 
 
             return affectedRows;
+        }
+
+
+        public static void WriteToEventLog(string message, EventLogEntryType level)
+        {
+            string source = "ProjectNameSource";
+            string log = "Application";
+            if (!EventLog.SourceExists(source))
+            {
+                EventLog.CreateEventSource(source, log);
+            }
+            EventLog.WriteEntry(source, message,
+                level);
         }
 
 
