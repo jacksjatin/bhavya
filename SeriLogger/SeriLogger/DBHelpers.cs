@@ -135,9 +135,6 @@ namespace SeriLogger
                 // throw rethrow;
                 WriteToEventLog(rethrow.Message, EventLogEntryType.Error);
             }
-
-
-
             return affectedRows;
         }
 

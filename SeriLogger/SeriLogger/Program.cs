@@ -20,7 +20,15 @@ namespace SeriLogger
 
         //}
         public static void Main(string[] args)
-        {           
+        {
+
+
+            string ackdata = "   HDR55891   FIDNDFile1   FSTF001   BODDocument1   FLDInterchangeFileND   " +
+                "DPKENROCRBYPASS   P01766357   EODDocument1   DSTD001   TRL1";
+
+            string[] source = ackdata.Split(new char[] {}, StringSplitOptions.RemoveEmptyEntries);
+            var matches = from word in source where word.StartsWith("FS") select word;
+            string rejectionCode = matches.ToArray()[0];
 
             #region ServiceNow
             DataSet ds = null;
