@@ -49,6 +49,19 @@ namespace SeriLogger
             return res;
         }
 
+        public int IncidentExistsByExceptionAndDPK(string Exception,string DPK, ref DataSet ds)
+        {
+            string selectQuery = string.Empty;
+            int res = 0;
+            selectQuery = "SELECT * from imiServiceNow where Exception=" + "'" + Exception + "'and DPK=" + "'" + DPK + "' and (convert(date,Timestamp) = convert(date,GETDATE()))";
+            ds = DBHelpers.ExecuteDS(selectQuery);
+            if (ds.Tables[0].Rows.Count > 0)
+            {
+                res = 1;
+            }
+            return res;
+        }            
+
         public int GetTodayIncidentCount(ref int count )
         {
             string selectQuery = string.Empty;

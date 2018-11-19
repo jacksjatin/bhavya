@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
 namespace SeriLogger
 {
@@ -23,12 +24,14 @@ namespace SeriLogger
         {
 
 
-            string ackdata = "   HDR55891   FIDNDFile1   FSTF001   BODDocument1   FLDInterchangeFileND   " +
-                "DPKENROCRBYPASS   P01766357   EODDocument1   DSTD001   TRL1";
+            string main = @"Error with input file: 4545714.idx Exception creating interchange file.Document Segment FLD for document: \\ibmlpri-te-ps1\d$\imi\Inprocess\one.tiff has no value";
+            string seg = GetSegment(main);
 
-            string[] source = ackdata.Split(new char[] {}, StringSplitOptions.RemoveEmptyEntries);
-            var matches = from word in source where word.StartsWith("FS") select word;
-            string rejectionCode = matches.ToArray()[0];
+            //string ackdata = "   HDR55891   FIDNDFile1   FSTF001   BODDocument1   FLDInterchangeFileND   " +
+            //    "DPKENROCRBYPASS   P01766357   EODDocument1   DSTD001   TRL1";
+            //string[] source = ackdata.Split(new char[] { }, StringSplitOptions.RemoveEmptyEntries);
+            //var matches = from word in source where word.StartsWith("FS") select word;
+            //string rejectionCode = matches.ToArray()[0];
 
             #region ServiceNow
             DataSet ds = null;
@@ -52,6 +55,10 @@ namespace SeriLogger
 
             //Find Incident By Exception
             res = sc.IncidentExistsByException("ACK NOT RECEIVED", ref ds);
+
+            //Find Incident By Exception and DPK
+
+            res = sc.IncidentExistsByExceptionAndDPK("ACK NOT RECEIVED", "ENC", ref ds);
 
 
             //Today Total Incidents Count
@@ -83,6 +90,23 @@ namespace SeriLogger
             #endregion
         }
 
+        public static string GetSegment(string excepMsg)
+        {
+            string Segment = string.Empty;
+            try {
+
+                Regex pattern = new Regex("(.*)Segment (?<Segment>(.*)) for(.*)");
+                Match match = pattern.Match(excepMsg);
+                Segment = match.Groups["Segment"].Value;
+                
+            }
+            catch(Exception ex)
+            {
+            }
+
+            return Segment;
+
+        }
 
         public void WriteToDB()
         {
