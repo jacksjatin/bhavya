@@ -7,58 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SeriLogger
+namespace ImiReconScheduler
 {
     class DBHelpers
-    {
-
-        public static DataSet ExecuteDS(string strSQL)
-        {
-            SqlConnection connection = null;
-            DataSet ds = null;
-            Exception rethrow = null;
-
-            try
-            {
-               
-                connection = ConnectionManager.GetSqlConnection();  
-                SqlCommand command = new SqlCommand(strSQL, connection);              
-                SqlDataAdapter adapter = new SqlDataAdapter();
-                adapter.SelectCommand = command;
-                ds = new DataSet();
-                adapter.Fill(ds);
-            }
-            catch (SqlException e)
-            {
-                string strMessage = "DBHelpers.ExecuteDS(..) SqlException!\n " +
-                    GetSQLExceptionText(e) + "\n\nSQL: " + strSQL;
-               // rethrow = new Exception(strMessage);
-                WriteToEventLog(strMessage, EventLogEntryType.Error);
-            }
-            catch (Exception e)
-            {
-                string strMessage = "DBHelpers.ExecuteDS(..) failed!\n "
-                    + e.Message
-                    + "\nSQL: " + strSQL;
-                // rethrow = new Exception(strMessage);
-                WriteToEventLog(strMessage, EventLogEntryType.Error);
-            }
-            finally
-            {
-                if (connection != null)
-                {
-                    connection.Close();
-                }
-            }
-
-            if (rethrow != null)
-            {
-                //throw rethrow;
-                WriteToEventLog(rethrow.Message, EventLogEntryType.Error);
-            }
-
-            return ds;
-        }
+    {    
 
         private static string GetSQLExceptionText(SqlException e)
         {
@@ -89,13 +41,59 @@ namespace SeriLogger
 
             return strReturn;
         }
+
+        public static DataSet ExecuteDS(string strSQL)
+        {
+            SqlConnection connection = null;
+            DataSet ds = null;
+            Exception rethrow = null;
+
+            try
+            {
+
+                connection = ConnectionManager.GetSqlConnection();
+                SqlCommand command = new SqlCommand(strSQL, connection);
+                SqlDataAdapter adapter = new SqlDataAdapter();
+                adapter.SelectCommand = command;
+                ds = new DataSet();
+                adapter.Fill(ds);
+            }
+            catch (SqlException e)
+            {
+                string strMessage = "DBHelpers.ExecuteDS(..) SqlException!\n " +
+                    GetSQLExceptionText(e) + "\n\nSQL: " + strSQL;
+                WriteToEventLog(strMessage, EventLogEntryType.Error);
+            }
+            catch (Exception e)
+            {
+                string strMessage = "DBHelpers.ExecuteDS(..) failed!\n "
+                    + e.Message
+                    + "\nSQL: " + strSQL;
+                WriteToEventLog(strMessage, EventLogEntryType.Error);
+            }
+            finally
+            {
+                if (connection != null)
+                {
+                    connection.Close();
+                }
+            }
+
+            if (rethrow != null)
+            {
+                WriteToEventLog(rethrow.Message, EventLogEntryType.Error);
+            }
+
+            return ds;
+        }
+
         public static int ExecuteNonQuery(string commandText, CommandType commandType, params SqlParameter[] commandParameters)
         {
             int affectedRows = 0;
             Exception rethrow = null;
             SqlConnection connection = null;
             try
-            {               
+            {
                 using (connection = ConnectionManager.GetSqlConnection())
                 {
                     using (var command = new SqlCommand(commandText, connection))
@@ -110,8 +108,6 @@ namespace SeriLogger
             {
                 string strMessage = "DBHelpers.ExecuteNonQuery(..) SqlException!\n " +
                     GetSQLExceptionText(e) + "\n\nSQL: " + commandText;
-               // rethrow = new Exception(strMessage);
-
                 WriteToEventLog(strMessage, EventLogEntryType.Error);
             }
             catch (Exception e)
@@ -119,7 +115,6 @@ namespace SeriLogger
                 string strMessage = "DBHelpers.ExecuteNonQuery(..) failed!\n "
                     + e.Message
                     + "\nSQL: " + commandText;
-                // rethrow = new Exception(strMessage);
                 WriteToEventLog(strMessage, EventLogEntryType.Error);
             }
             finally
@@ -132,7 +127,6 @@ namespace SeriLogger
 
             if (rethrow != null)
             {
-                // throw rethrow;
                 WriteToEventLog(rethrow.Message, EventLogEntryType.Error);
             }
             return affectedRows;
@@ -141,7 +135,7 @@ namespace SeriLogger
 
         public static void WriteToEventLog(string message, EventLogEntryType level)
         {
-            string source = "ProjectNameSource";
+            string source = "ImiReconScheduler";
             string log = "Application";
             if (!EventLog.SourceExists(source))
             {

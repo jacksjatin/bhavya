@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImiReconScheduler", "ImiReconScheduler\ImiReconScheduler.csproj", "{14345E35-3891-44AB-A012-B5D43CDC67D7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{14345E35-3891-44AB-A012-B5D43CDC67D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14345E35-3891-44AB-A012-B5D43CDC67D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14345E35-3891-44AB-A012-B5D43CDC67D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14345E35-3891-44AB-A012-B5D43CDC67D7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7ED06201-E7EB-4E8A-A75D-D1410D3A0450}
+	EndGlobalSection
+EndGlobal

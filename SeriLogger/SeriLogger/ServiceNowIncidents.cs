@@ -49,7 +49,7 @@ namespace SeriLogger
             return res;
         }
 
-        public int IncidentExistsByExceptionAndDPK(string Exception,string DPK, ref DataSet ds)
+        public int IncidentExistsByExceptionAndDPK(string Exception, string DPK, ref DataSet ds)
         {
             string selectQuery = string.Empty;
             int res = 0;
@@ -60,14 +60,14 @@ namespace SeriLogger
                 res = 1;
             }
             return res;
-        }            
+        }
 
-        public int GetTodayIncidentCount(ref int count )
+        public int GetTodayIncidentCount(ref int count)
         {
             string selectQuery = string.Empty;
             int res = 0;
             selectQuery = "SELECT count(*) as count FROM imiServiceNow WHERE (DAY(Timestamp) = DAY(GETDATE())) AND (MONTH(Timestamp) = MONTH(GETDATE())) AND (YEAR(Timestamp) = YEAR(GETDATE()))";
-       DataSet ds = DBHelpers.ExecuteDS(selectQuery);
+            DataSet ds = DBHelpers.ExecuteDS(selectQuery);
             if (ds.Tables[0].Rows.Count > 0)
             {
                 count = Convert.ToInt32(ds.Tables[0].Rows[0]["count"]);
