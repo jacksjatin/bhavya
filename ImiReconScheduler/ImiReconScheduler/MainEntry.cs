@@ -24,6 +24,7 @@ namespace ImiReconScheduler
             string errMsg = string.Empty;
 
             SynergerticsUpdate synObj = null;
+            RightFaxUpdate rightfaxObj = null;
 
             // Basic validations
             ValidateArgs chkArgsEnum = ValidateArgs.Success;
@@ -63,6 +64,16 @@ namespace ImiReconScheduler
                 synObj.ProcessSynRecords();
                 return;
             }
+
+            if (args[0].Equals("RIGHTFAX", StringComparison.CurrentCultureIgnoreCase))
+            {
+                //Process SYNERGERTICS Records
+                rightfaxObj = new RightFaxUpdate();
+                rightfaxObj.processRightfaxRecords();
+                return;
+            }
+
+
         }
 
         private static ValidateArgs ValidateParameters(string[] args)

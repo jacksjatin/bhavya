@@ -54,6 +54,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="RightFaxHelper.cs" />
+    <Compile Include="RightFaxUpdate.cs" />
     <Compile Include="SynergerticsUpdate.cs" />
     <Compile Include="SyngEntityHelper.cs" />
   </ItemGroup>
@@ -68,6 +70,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="RowIndexStore.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
