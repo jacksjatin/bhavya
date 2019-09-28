@@ -39,8 +39,12 @@ namespace IMIFileGeneratorOutboundScheduler
             try
             {
                 //string inputPath = ConfigurationManager.AppSettings["Input"];
-                DPKMappingCsv();
-                ParseInput(inputPath.FullName);
+                //DPKMappingCsv();
+                //ParseInput(inputPath.FullName);
+
+                List<ProcessKey> mappingKeyValueList = MappingList();
+                updateMappingList(inputPath.FullName, ref mappingKeyValueList);
+               
                 StringBuilder sb = new StringBuilder();
                 string InprocessLocation = ConfigurationManager.AppSettings["OutboundInProcessLocation"].ToString();
                 string ArchiveLocation = ConfigurationManager.AppSettings["OutboundArchiveLocation"].ToString();
@@ -56,7 +60,7 @@ namespace IMIFileGeneratorOutboundScheduler
                     foreach (var img in obj.imagePath)
                     {
                         str = str + " " + obj.imagePath;
-                    }                   
+                    }
                     sb.Append(str.ToString());
                     sb.Append("\n");
                 }
@@ -67,28 +71,28 @@ namespace IMIFileGeneratorOutboundScheduler
                 string idxcontent = File.ReadAllText(inputPath.FullName);
                 string[] allSegm = idxcontent.Split('|');
                 string imgPath = allSegm.Last();
-                FileInfo finf= new FileInfo(imgPath);
+                FileInfo finf = new FileInfo(imgPath);
                 string folderName = finf.Directory.Name;
-                
-               if(Directory.Exists(Path.Combine(InprocessLocation, folderName)))
+
+                if (Directory.Exists(Path.Combine(InprocessLocation, folderName)))
                 {
                     string[] getImagePath = Directory.EnumerateFiles(Path.Combine(InprocessLocation, folderName.Replace(".idx", ""))).
                     Where(fn => !Path.GetExtension(fn)
                     .Equals(".idx", StringComparison.OrdinalIgnoreCase)).ToArray();
                     isFolder = true;
-                  string mergedImgPath =  findImagePath(getImagePath, folderName.Replace(".idx", ""));
+                    string mergedImgPath = findImagePath(getImagePath, folderName.Replace(".idx", ""));
                 }
-               else if(File.Exists(Path.Combine(InprocessLocation, folderName))) 
+                else if (File.Exists(Path.Combine(InprocessLocation, folderName)))
                 {
 
                     DirectoryInfo dir = new DirectoryInfo(InprocessLocation);
-                    FileInfo[] files = dir.GetFiles(folderName.Replace(".idx", "")+"*", SearchOption.TopDirectoryOnly)
+                    FileInfo[] files = dir.GetFiles(folderName.Replace(".idx", "") + "*", SearchOption.TopDirectoryOnly)
                     .Where(f => f.Extension != ".idx").ToArray<FileInfo>();
                     //string[] getImagePath = Directory.EnumerateFiles(InprocessLocation).
                     //Where(fn => !Path.GetExtension(fn)
                     //.Equals(".idx", StringComparison.OrdinalIgnoreCase)).ToArray();
                     string s = files[0].FullName.ToString();
-                }          
+                }
 
                 WriteOutputFile(Path.GetFileNameWithoutExtension(inputPath.FullName) + DateTime.Now.ToString("yyyyMMddhhmm") + ".imi", sb.ToString());
                 if (isFolder)
@@ -97,7 +101,7 @@ namespace IMIFileGeneratorOutboundScheduler
                         helpers.MoveFile(Path.Combine(InprocessLocation, inputPath.Name), Path.Combine(ArchiveLocation, inputPath.Name), true);
                     if (Directory.Exists(Path.Combine(InprocessLocation, folderName.Replace(".idx", ""))))
                     {
-                        if(Directory.Exists(Path.Combine(ArchiveLocation, folderName.Replace(".idx", ""))))
+                        if (Directory.Exists(Path.Combine(ArchiveLocation, folderName.Replace(".idx", ""))))
                         {
                             Directory.Delete(Path.Combine(ArchiveLocation, folderName.Replace(".idx", "")), true);
                         }
@@ -127,13 +131,13 @@ namespace IMIFileGeneratorOutboundScheduler
         }
 
 
-        public string findImagePath(string[] sArry,string imgName)
+        public string findImagePath(string[] sArry, string imgName)
         {
             string foundImgPath = string.Empty;
             foreach (var item in sArry)
             {
                 FileInfo fl = new FileInfo(item);
-                if(fl.Name.Contains(imgName))
+                if (fl.Name.Contains(imgName))
                 {
                     foundImgPath = fl.FullName;
                     return foundImgPath;
@@ -164,7 +168,7 @@ namespace IMIFileGeneratorOutboundScheduler
                 {
                     string[] splitedline = inpArr[i].Split('|');
 
-                    string dpkvalue = splitedline[28];
+                    string dpkvalue = splitedline[27];
                     string imgPath = splitedline.Last();
                     if (_dicDmkMaps[dpkvalue].imagePath == null)
                     {
@@ -181,6 +185,7 @@ namespace IMIFileGeneratorOutboundScheduler
 
                         string key = dictionary.lstProcessKeys[j].dpkKey;
                         string position = dictionary.lstProcessKeys[j].dpkPostion;
+
                         if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(position))
                         {
                             dictionary.lstProcessKeys[j].Actualvalue = "";
@@ -198,7 +203,7 @@ namespace IMIFileGeneratorOutboundScheduler
 
             }
 
-        }
+        }       
 
         public void DPKMappingCsv()
         {
@@ -229,7 +234,7 @@ namespace IMIFileGeneratorOutboundScheduler
                             lstprocKeys.Add(processKey);
                         }
                         else
-                        {                            
+                        {
                             string[] strsplit = item.Split('_');
                             processKey.dpkKey = strsplit[0];
                             processKey.dpkPostion = strsplit[1];
@@ -240,7 +245,7 @@ namespace IMIFileGeneratorOutboundScheduler
                     objdmi.strDpkValue = dpk;
                     objdmi.lstProcessKeys = lstprocKeys;
                     _dicDmkMaps.Add(objdmi.strDpkValue, objdmi);
-                }               
+                }
             }
             catch (Exception ex)
             {
@@ -248,5 +253,32 @@ namespace IMIFileGeneratorOutboundScheduler
             }
         }
 
+        public void updateMappingList(string path, ref List<ProcessKey> lstProcessKeys)
+        {
+            string[] splitedlines = File.ReadAllLines(path).First().Split('|');
+
+            for (int i = 19; i < splitedlines.Length; i++)
+            {
+                var obj = lstProcessKeys.Find(x => x.dpkPostion == i.ToString());
+                obj.Actualvalue = splitedlines[i];
+            }
+        }
+
+        public List<ProcessKey> MappingList()
+        {
+            string[] maplist = ConfigurationManager.AppSettings["MappingKeys"].ToString().Split(',');
+            List<ProcessKey> lstProcessKeys = new List<ProcessKey>();
+
+            foreach (var item in maplist)
+            {
+                string[] keyValue = item.Split('_');
+                lstProcessKeys.Add(new ProcessKey
+                {
+                    dpkKey = keyValue[0],
+                    dpkPostion = keyValue[1]
+                });
+            }
+            return lstProcessKeys;
+        }
     }
 }

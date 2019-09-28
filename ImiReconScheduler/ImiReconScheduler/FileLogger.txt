@@ -1,0 +1,3 @@
+Start Time: 27-04-2019 08:00:37Current Index: 47Query GetRecordsbyLastIndex: SELECT * FROM(SELECT ROW_NUMBER() OVER(ORDER BY(select 0)) as RowNo, * FROM Rightfax) as t WHERE RowNo>47
+Table Row Count: 0 or  null
+Full Trace: End Time: 27-04-2019 08:00:39
