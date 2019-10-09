@@ -1,8 +1,10 @@
 ﻿using IMIReportGenerator.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace IMIReportGenerator
@@ -15,12 +17,13 @@ namespace IMIReportGenerator
             DBHelper helper = new DBHelper();
             Mailer mailer = new Mailer();
             DataSet ds = new DataSet();
-            string dpks = string.Empty;
+            List<string> requiredDpks = new List<string>();
             int monthsback = 0;
             bool isMail = false;
             try
             {
-                dpks = helper.FormateDPKString(ConfigurationManager.AppSettings["Dpks"]);
+                requiredDpks = ConfigurationManager.AppSettings["Dpks"].Split(',').ToList();
+                string dpks = helper.FormateDPKString(requiredDpks);
                 int.TryParse(ConfigurationManager.AppSettings["MonthlyIntervalInMonths"], out monthsback);
                 monthlySumry.GetMonthlyRecords(monthsback, dpks, ref ds);
 
@@ -32,8 +35,9 @@ namespace IMIReportGenerator
                 if (isMail)
                 {
                     string Subject = sb.ToString();
-                    string Msg = RenderDataTableToHtml(ds.Tables[0]);
-                    mailer.SendMail(Subject, Msg);
+                    string Msg = ds.Tables.Count > 0 ? RenderDataTableToHtml(ds.Tables[0]) : "No Records found";
+                    if (!string.IsNullOrEmpty(Msg)) { mailer.SendMail(Subject, Msg); }
+
                 }
 
             }
@@ -46,7 +50,7 @@ namespace IMIReportGenerator
         private string RenderDataTableToHtml(DataTable dtInfo)
         {
             StringBuilder tableStr = new StringBuilder();
-
+            int totalCount = 0;
             if (dtInfo.Rows != null && dtInfo.Rows.Count > 0)
             {
                 int columnsQty = dtInfo.Columns.Count;
@@ -67,10 +71,17 @@ namespace IMIReportGenerator
                     {
                         tableStr.Append("<TD>");
                         tableStr.Append(dtInfo.Rows[i][k].ToString());
+                        if (k == 2)
+                        {
+                            totalCount += (int)dtInfo.Rows[i][k];
+                        }
                         tableStr.Append("</TD>");
                     }
                     tableStr.Append("</TR>");
                 }
+
+                tableStr.Append("<TR>" + "<TD>TOTAL</TD><TD></TD>" + "<TD>" + totalCount.ToString() + "</TD></TR>");
+
 
                 tableStr.Append("</TABLE>");
             }

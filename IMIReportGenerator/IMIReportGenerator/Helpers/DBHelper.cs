@@ -132,9 +132,9 @@ namespace IMIReportGenerator.Helpers
             return affectedRows;
         }
 
-        public string FormateDPKString(string dpks)
+        public string FormateDPKString(List<string> requiredDpks)
         {
-            var requiredDpks = dpks.Split(',').ToList();
+
             return String.Join(", ", from l in requiredDpks select String.Format("'{0}'", l));
         }
 
