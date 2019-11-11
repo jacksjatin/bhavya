@@ -1,4 +1,6 @@
 ﻿using IMIReportGenerator.Helpers;
+using IMIReportGenerator.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -27,8 +29,10 @@ namespace IMIReportGenerator
                 string date = DateTime.Today.AddDays(-daysback).ToString("yyyy-MM-dd");
                 dailySumry.GetDailyRecords(date, dpks, ref ds);
 
+                RootObject obj = JsonConvert.DeserializeObject<RootObject>(mailer.GetSubscriberConfig());
+
                 Boolean.TryParse(ConfigurationManager.AppSettings["isMail"], out isMail);
-                StringBuilder sb = new StringBuilder();
+                string subject = string.Empty;
 
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
                 {
@@ -41,15 +45,18 @@ namespace IMIReportGenerator
                         {
                             count = dr["TOTAL"].ToString();
                         }
-                        sb.Append(dpk + " Daily batch count : " + count + " ");
-                    });
+                        subject = dpk + " Daily batch count : " + count + " ";
 
-                    if (isMail)
-                    {
-                        string Subject = sb.ToString();
-                        string Msg = sb.ToString();
-                        mailer.SendMail(Subject, Msg);
-                    }
+                        DpkSubscriber dpkconfig = obj.DpkSubscribers.Find(x => x.Dpk == dpk);
+                        if (dpkconfig != null && dpkconfig.Subscribers.Count > 0 && isMail)
+                        {
+                            mailer.SendMail(subject, subject, dpkconfig.Subscribers);
+                        }
+                        else
+                        {
+                            //Log Config Not found for DPK
+                        }
+                    });
                 }
                 else
                 {

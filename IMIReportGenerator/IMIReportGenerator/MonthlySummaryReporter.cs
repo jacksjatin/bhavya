@@ -1,4 +1,6 @@
 ﻿using IMIReportGenerator.Helpers;
+using IMIReportGenerator.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -11,6 +13,11 @@ namespace IMIReportGenerator
 {
     public class MonthlySummaryReporter
     {
+
+        public MonthlySummaryReporter()
+        {
+
+        }
         public void processMonthlyRecords()
         {
             MonthlySummary monthlySumry = new MonthlySummary();
@@ -25,20 +32,25 @@ namespace IMIReportGenerator
                 requiredDpks = ConfigurationManager.AppSettings["Dpks"].Split(',').ToList();
                 string dpks = helper.FormateDPKString(requiredDpks);
                 int.TryParse(ConfigurationManager.AppSettings["MonthlyIntervalInMonths"], out monthsback);
-                monthlySumry.GetMonthlyRecords(monthsback, dpks, ref ds);
-
-                Boolean.TryParse(ConfigurationManager.AppSettings["isMail"], out isMail);
-                StringBuilder sb = new StringBuilder();
-
-                sb.Append($"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.AddMonths(-monthsback).Month)} Report");
-
-                if (isMail)
+                RootObject obj = JsonConvert.DeserializeObject<RootObject>(mailer.GetSubscriberConfig());
+                requiredDpks.ForEach(dpk =>
                 {
-                    string Subject = sb.ToString();
-                    string Msg = ds.Tables.Count > 0 ? RenderDataTableToHtml(ds.Tables[0]) : "No Records found";
-                    if (!string.IsNullOrEmpty(Msg)) { mailer.SendMail(Subject, Msg); }
+                    Boolean.TryParse(ConfigurationManager.AppSettings["isMail"], out isMail);
+                    string Subject = string.Empty;
+                    monthlySumry.GetMonthlyRecords(monthsback, String.Format("'{0}'", dpk), ref ds);
+                    Subject = $"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.AddMonths(-monthsback).Month)} Report";
+                    DpkSubscriber dpkconfig = obj.DpkSubscribers.Find(x => x.Dpk == dpk);
 
-                }
+                    if (dpkconfig != null && dpkconfig.Subscribers.Count > 0 && isMail)
+                    {
+                        string Msg = ds.Tables.Count > 0 ? RenderDataTableToHtml(ds.Tables[0]) : "No Records found";
+                        if (!string.IsNullOrEmpty(Msg)) { mailer.SendMail(Subject, Msg, dpkconfig.Subscribers); }
+                    }
+                    else
+                    {
+                        //Log Config Not found for DPK
+                    }
+                });
 
             }
             catch (Exception ex)
