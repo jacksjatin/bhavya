@@ -29,8 +29,7 @@ namespace IMIReportGenerator
             bool isMail = false;
             try
             {
-                requiredDpks = ConfigurationManager.AppSettings["Dpks"].Split(',').ToList();
-                string dpks = helper.FormateDPKString(requiredDpks);
+                requiredDpks = ConfigurationManager.AppSettings["Dpks"].Split(',').ToList();               
                 int.TryParse(ConfigurationManager.AppSettings["MonthlyIntervalInMonths"], out monthsback);
                 RootObject obj = JsonConvert.DeserializeObject<RootObject>(mailer.GetSubscriberConfig());
                 requiredDpks.ForEach(dpk =>
