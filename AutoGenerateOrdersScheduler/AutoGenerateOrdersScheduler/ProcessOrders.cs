@@ -21,30 +21,33 @@ namespace AutoGenerateOrdersScheduler
             {
                 string inputFolder = ConfigurationManager.AppSettings["InputFolderPath"].ToString();
 
-                string[] filepath = Directory.GetFiles(inputFolder, "*.csv");
+                string[] filepaths = Directory.GetFiles(inputFolder, "*.csv");
 
-                DataTable dt = CSVService.ConvertCSVtoDataTable(filepath[0]);
-
-
-                if (dt != null && dt.Rows.Count > 0)
+                foreach (var fpath in filepaths)
                 {
-                    foreach (DataRow dr in dt.Rows)
+                    if (File.Exists(fpath))
                     {
-                        var vccOrd = new VaccineOrderModel
+                        DataTable dt = CSVService.ConvertCSVtoDataTable(fpath);
+
+                        if (dt != null && dt.Rows.Count > 0)
                         {
-                            ProvId = dr["ProvId"].ToString(),
-                            NdcCode = dr["NdcCode"].ToString(),
-                            DosesOrdered = dr["DosesOrdered"].ToString(),
-                            DAPed = dr["DAPed"].ToString(),
-                            DAAdult = dr["DAAdult"].ToString()
-                        };
+                            foreach (DataRow dr in dt.Rows)
+                            {
+                                var vccOrd = new VaccineOrderModel
+                                {
+                                    ProvId = dr["ProvId"].ToString(),
+                                    NdcCode = dr["NdcCode"].ToString(),
+                                    DosesOrdered = dr["DosesOrdered"].ToString(),
+                                    DAPed = dr["DAPed"].ToString(),
+                                    DAAdult = dr["DAAdult"].ToString()
+                                };
 
-                        this.ProccessAllOrders(vccOrd);
+                                this.ProccessAllOrders(vccOrd);
+                            }
+                        }
                     }
-                }
-
-
-
+                }               
+                
             }
             catch (Exception ex)
             {
