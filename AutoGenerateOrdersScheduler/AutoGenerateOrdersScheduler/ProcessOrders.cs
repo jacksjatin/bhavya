@@ -23,16 +23,23 @@ namespace AutoGenerateOrdersScheduler
 
                 string[] filepaths = Directory.GetFiles(inputFolder, "*.csv");
 
+
+
                 foreach (var fpath in filepaths)
                 {
                     if (File.Exists(fpath))
                     {
                         DataTable dt = CSVService.ConvertCSVtoDataTable(fpath);
 
+                        Dictionary<string, List<VaccineOrderModel>> _dicVccOrders = new Dictionary<string, List<VaccineOrderModel>>();
+
+                        List<VaccineOrderModel> _listVcc = new List<VaccineOrderModel>();
+
                         if (dt != null && dt.Rows.Count > 0)
                         {
                             foreach (DataRow dr in dt.Rows)
                             {
+                                var provId = dr["ProvId"].ToString();
                                 var vccOrd = new VaccineOrderModel
                                 {
                                     ProvId = dr["ProvId"].ToString(),
@@ -42,12 +49,16 @@ namespace AutoGenerateOrdersScheduler
                                     DAAdult = dr["DAAdult"].ToString()
                                 };
 
-                                this.ProccessAllOrders(vccOrd);
+                                _listVcc.Add(vccOrd);
                             }
+
+                            _dicVccOrders = _listVcc.GroupBy(x => x.ProvId).ToDictionary(d => d.Key, d => d.ToList());
+
+                            this.ProccessAllOrders(_dicVccOrders);
                         }
                     }
-                }               
-                
+                }
+
             }
             catch (Exception ex)
             {
@@ -58,21 +69,34 @@ namespace AutoGenerateOrdersScheduler
         }
 
 
-        public void ProccessAllOrders(VaccineOrderModel vccOrdMdl)
-        {
-            // Get CtrlNum
+        public void ProccessAllOrders(Dictionary<string, List<VaccineOrderModel>> _dicVccOrds)
+        {           
 
-            string orderId = this.GetCtrlNum();
+            // loop through dictionary 
 
-            // Create Order with Provider 
-            this.CreateProviderOrder(orderId, vccOrdMdl.ProvId);
+            foreach (var provVcc in _dicVccOrds)
+            {
+                // Get CtrlNum
 
-            // Get CategoryId and MfrCode
+                string orderId = this.GetCtrlNum();
 
-            var codes = this.GetCodes(vccOrdMdl.ProvId, vccOrdMdl.NdcCode);
+                // Create Order with Provider 
+                this.CreateProviderOrder(orderId, provVcc.Key);
 
-            // Create Vaccine Orders
-            this.CreateVaccineOrders(orderId, vccOrdMdl.NdcCode, codes.CategoryId, codes.MftrCode, vccOrdMdl.DosesOrdered, vccOrdMdl.DAPed, vccOrdMdl.DAAdult);
+                foreach (var vccOrdMdl in provVcc.Value)
+                {
+                    // Get CategoryId and MfrCode
+
+                    var codes = this.GetCodes(vccOrdMdl.ProvId, vccOrdMdl.NdcCode);
+
+                    // Create Vaccine Orders
+                    this.CreateVaccineOrders(orderId, vccOrdMdl.NdcCode, codes.CategoryId, codes.MftrCode, vccOrdMdl.DosesOrdered, vccOrdMdl.DAPed, vccOrdMdl.DAAdult);
+
+                }
+
+                // Send email here
+
+            }
 
         }
 
